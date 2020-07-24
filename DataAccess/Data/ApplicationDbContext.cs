@@ -32,6 +32,7 @@ namespace Hotel_API_Project.Data
                 .HasOne(x => x.Reservation)
                 .WithMany(x => x.RoomReservations)
                 .HasForeignKey(x => x.ReservationID);
+            base.OnModelCreating(modelBuilder);
         }
     }
 }
