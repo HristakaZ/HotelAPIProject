@@ -12,6 +12,7 @@ using Hotel_API_Project.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using DataAccess.Repositories;
 
 namespace Hotel_API_Project
 {
@@ -30,10 +31,20 @@ namespace Hotel_API_Project
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("MyConnectionString")));
+
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
             services.AddControllersWithViews();
+
             services.AddRazorPages();
+
+            services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+            services.AddScoped<IGuestRepository, GuestRepository>();
+            services.AddScoped<IRoomRepository, RoomRepository>();
+            services.AddScoped<IReservationRepository, ReservationRepository>();
+            services.AddScoped<IPositionRepository, PositionRepository>();
+            services.AddScoped<IRoomTypeRepository, RoomTypeRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
