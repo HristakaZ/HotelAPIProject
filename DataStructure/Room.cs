@@ -10,7 +10,7 @@ namespace DataStructure
         [Key]
         public int ID { get; set; }
         public int Number { get; set; }
-        public RoomType RoomType { get; set; }
-        public List<RoomReservation> RoomReservations { get; set; }
+        public virtual RoomType RoomType { get; set; }
+        public virtual List<RoomReservation> RoomReservations { get; set; }
     }
 }

@@ -34,5 +34,9 @@ namespace Hotel_API_Project.Data
                 .HasForeignKey(x => x.ReservationID);
             base.OnModelCreating(modelBuilder);
         }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseLazyLoadingProxies();
+        }
     }
 }

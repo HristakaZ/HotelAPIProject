@@ -9,7 +9,7 @@ namespace DataStructure
         [Key]
         public int ID { get; set; }
         public string Name { get; set; }
-        public Position Position { get; set; }
-        public List<Reservation> Reservations { get; set; }
+        public virtual Position Position { get; set; }
+        public virtual List<Reservation> Reservations { get; set; }
     }
 }

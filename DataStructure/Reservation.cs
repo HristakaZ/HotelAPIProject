@@ -9,10 +9,10 @@ namespace DataStructure
     {
         [Key]
         public int ID { get; set; }
-        public Guest Guest { get; set; }
-        public Employee Employee { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public List<RoomReservation> RoomReservations { get; set; }
+        public virtual Guest Guest { get; set; }
+        public virtual Employee Employee { get; set; }
+        public virtual List<RoomReservation> RoomReservations { get; set; }
     }
 }

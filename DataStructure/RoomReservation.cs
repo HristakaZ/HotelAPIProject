@@ -7,8 +7,8 @@ namespace DataStructure
     public class RoomReservation
     {
         public int RoomID { get; set; }
-        public Room Room { get; set; }
+        public virtual Room Room { get; set; }
         public int ReservationID { get; set; }
-        public Reservation Reservation { get; set; }
+        public virtual Reservation Reservation { get; set; }
     }
 }
