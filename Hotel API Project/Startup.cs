@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using DataAccess.Repositories;
+using DataStructure;
 
 namespace Hotel_API_Project
 {
@@ -32,7 +33,7 @@ namespace Hotel_API_Project
                 options.UseSqlServer(
                     Configuration.GetConnectionString("MyConnectionString")));
 
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            services.AddDefaultIdentity<EmployeeApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddControllersWithViews();

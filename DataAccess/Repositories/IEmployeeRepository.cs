@@ -7,9 +7,9 @@ namespace DataAccess.Repositories
 {
     public interface IEmployeeRepository
     {
-        List<Employee> GetEmployees();
-        Employee GetEmployeeByID(int id);
-        void CreateEmployee(Employee employee);
+        List<EmployeeApplicationUser> GetEmployees();
+        EmployeeApplicationUser GetEmployeeByID(int id);
+        void CreateEmployee(EmployeeApplicationUser employee);
         void UpdateEmployee(int id);
         void DeleteEmployee(int id);
     }

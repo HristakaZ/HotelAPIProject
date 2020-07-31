@@ -7,9 +7,9 @@ namespace DataAccess.Repositories
 {
     public interface IPositionRepository
     {
-        List<Position> GetPositions();
-        Position GetPositionByID(int id);
-        void CreatePosition(Position position);
+        List<PositionApplicationRole> GetPositions();
+        PositionApplicationRole GetPositionByID(int id);
+        void CreatePosition(PositionApplicationRole position);
         void UpdatePosition(int id);
         void DeletePosition(int id);
     }

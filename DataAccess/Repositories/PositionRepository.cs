@@ -15,30 +15,30 @@ namespace DataAccess.Repositories
             this.dbContext = dbContext;
         }
 
-        public List<Position> GetPositions()
+        public List<PositionApplicationRole> GetPositions()
         {
             return dbContext.Positions.ToList();
         }
 
-        public Position GetPositionByID(int id)
+        public PositionApplicationRole GetPositionByID(int id)
         {
-            return dbContext.Positions.Where(x => x.ID == id).FirstOrDefault();
+            return dbContext.Positions.Where(x => x.Id == id).FirstOrDefault();
         }
 
-        public void CreatePosition(Position position)
+        public void CreatePosition(PositionApplicationRole position)
         {
             dbContext.Positions.Add(position);
         }
 
         public void UpdatePosition(int id)
         {
-            Position position = GetPositionByID(id);
+            PositionApplicationRole position = GetPositionByID(id);
             dbContext.Positions.Update(position);
         }
 
         public void DeletePosition(int id)
         {
-            Position position = GetPositionByID(id);
+            PositionApplicationRole position = GetPositionByID(id);
             dbContext.Positions.Remove(position);
         }
 

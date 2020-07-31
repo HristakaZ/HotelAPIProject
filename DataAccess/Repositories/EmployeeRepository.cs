@@ -16,30 +16,30 @@ namespace DataAccess.Repositories
             this.dbContext = dbContext;
         }
 
-        public List<Employee> GetEmployees()
+        public List<EmployeeApplicationUser> GetEmployees()
         {
             return dbContext.Employees.ToList();
         }
 
-        public Employee GetEmployeeByID(int id)
+        public EmployeeApplicationUser GetEmployeeByID(int id)
         {
-            return dbContext.Employees.Where(x => x.ID == id).FirstOrDefault();
+            return dbContext.Employees.Where(x => x.Id == id).FirstOrDefault();
         }
 
-        public void CreateEmployee(Employee employee)
+        public void CreateEmployee(EmployeeApplicationUser employee)
         {
-            dbContext.Add(employee);
+            dbContext.Employees.Add(employee);
         }
 
         public void UpdateEmployee(int id)
         {
-            Employee employee = GetEmployeeByID(id);
+            EmployeeApplicationUser employee = GetEmployeeByID(id);
             dbContext.Employees.Update(employee);
         }
 
         public void DeleteEmployee(int id)
         {
-            Employee employee = GetEmployeeByID(id);
+            EmployeeApplicationUser employee = GetEmployeeByID(id);
             dbContext.Employees.Remove(employee);
         }
 
