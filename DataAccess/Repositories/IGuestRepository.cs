@@ -10,7 +10,7 @@ namespace DataAccess.Repositories
         List<Guest> GetGuests();
         Guest GetGuestByID(int id);
         void CreateGuest(Guest guest);
-        void UpdateGuest(int id);
+        void UpdateGuest(Guest guest);
         void DeleteGuest(int id);
     }
 }

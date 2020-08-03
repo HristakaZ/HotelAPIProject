@@ -30,10 +30,12 @@ namespace DataAccess.Repositories
             dbContext.Reservations.Add(reservation);
         }
 
-        public void UpdateReservation(int id)
+        public void UpdateReservation(Reservation reservation)
         {
-            Reservation reservation = GetReservationByID(id);
-            dbContext.Reservations.Update(reservation);
+            Reservation reservationToUpdate = GetReservationByID(reservation.ID);
+            // this code might be extended later, for more property updates
+            reservationToUpdate.StartDate = reservation.StartDate;
+            dbContext.Reservations.Update(reservationToUpdate);
         }
 
         public void DeleteReservation(int id)

@@ -10,7 +10,7 @@ namespace DataAccess.Repositories
         List<PositionApplicationRole> GetPositions();
         PositionApplicationRole GetPositionByID(int id);
         void CreatePosition(PositionApplicationRole position);
-        void UpdatePosition(int id);
+        void UpdatePosition(PositionApplicationRole position);
         void DeletePosition(int id);
     }
 }

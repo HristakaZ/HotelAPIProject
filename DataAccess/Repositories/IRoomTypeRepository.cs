@@ -7,10 +7,10 @@ namespace DataAccess.Repositories
 {
     public interface IRoomTypeRepository
     {
-        List<RoomType> GetRoomType();
+        List<RoomType> GetRoomTypes();
         RoomType GetRoomTypeByID(int id);
         void CreateRoomType(RoomType roomType);
-        void UpdateRoomType(int id);
+        void UpdateRoomType(RoomType roomType);
         void DeleteRoomType(int id);
     }
 }

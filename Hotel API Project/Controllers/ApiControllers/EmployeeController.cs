@@ -2,19 +2,28 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DataAccess.Repositories;
+using DataStructure;
+using Hotel_API_Project.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-/*namespace Hotel_API_Project.Controllers.ApiControllers
+namespace Hotel_API_Project.Controllers.ApiControllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class EmployeeController : ControllerBase
     {
+        private IEmployeeRepository iEmployeeRepository;
+        public EmployeeController(IEmployeeRepository iEmployeeRepository)
+        {
+            this.iEmployeeRepository = iEmployeeRepository;
+        }
         // GET: api/<EmployeeController>
         [HttpGet]
-        public List<Employee> GetEmployees()
+        public List<EmployeeApplicationUser> GetEmployees()
         {
+            List<EmployeeApplicationUser> employees = iEmployeeRepository.GetEmployees();
             return employees;
         }
 
@@ -22,7 +31,7 @@ using Microsoft.AspNetCore.Mvc;
         [HttpGet("{id}", Name = "GetEmployeeByID")]
         public IActionResult GetEmployeeByID(int id)
         {
-            Employee employee = employees.Where(x => x.ID == id).FirstOrDefault();
+            EmployeeApplicationUser employee = iEmployeeRepository.GetEmployeeByID(id);
             if (employee != null)
             {
                 return Ok(employee);
@@ -35,13 +44,13 @@ using Microsoft.AspNetCore.Mvc;
 
         // POST api/<EmployeeController>
         [HttpPost]
-        public IActionResult Post([FromBody] Employee employee)
+        public IActionResult Post([FromBody] EmployeeApplicationUser employee)
         {
             try
             {
-                employees.Add(employee);
-                Uri uri = new Uri(Url.Link("GetEmployeeByID", new { id = employee.ID }));
-                return Created(uri, employee.ID.ToString());
+                iEmployeeRepository.CreateEmployee(employee);
+                Uri uri = new Uri(Url.Link("GetEmployeeByID", new { Id = employee.Id }));
+                return Created(uri, employee.Id.ToString());
             }
             catch (Exception ex)
             {
@@ -51,18 +60,17 @@ using Microsoft.AspNetCore.Mvc;
 
         // PUT api/<EmployeeController>/5
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Employee employee)
+        public IActionResult Put(int id, [FromBody] EmployeeApplicationUser employee)
         {
-            Employee employeeToUpdate = employees.Where(x => x.ID == id).FirstOrDefault();
-            if (employeeToUpdate != null)
+            if (employee != null)
             {
-                employeeToUpdate.ID = employee.ID;
-                employeeToUpdate.Name = employee.Name;
-                return Ok(employeeToUpdate);
+                employee.Id = id;
+                iEmployeeRepository.UpdateEmployee(employee);
+                return Ok(employee);
             }
             else
             {
-                return NotFound("Employee with ID " + employee.ID.ToString() + " was not found.");
+                return NotFound("Employee with ID " + id.ToString() + " was not found.");
             }
         }
 
@@ -70,10 +78,10 @@ using Microsoft.AspNetCore.Mvc;
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            Employee employeeToDelete = employees.Where(x => x.ID == id).FirstOrDefault();
+            EmployeeApplicationUser employeeToDelete = iEmployeeRepository.GetEmployeeByID(id);
             if (employeeToDelete != null)
             {
-                employees.Remove(employeeToDelete);
+                iEmployeeRepository.DeleteEmployee(employeeToDelete.Id);
                 return Ok(employeeToDelete);
             }
             else
@@ -83,4 +91,3 @@ using Microsoft.AspNetCore.Mvc;
         }
     }
 }
-*/

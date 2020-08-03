@@ -10,7 +10,7 @@ namespace DataAccess.Repositories
         List<Room> GetRooms();
         Room GetRoomByID(int id);
         void CreateRoom(Room room);
-        void UpdateRoom(int id);
+        void UpdateRoom(Room room);
         void DeleteRoom(int id);
     }
 }

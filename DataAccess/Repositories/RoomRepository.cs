@@ -30,10 +30,12 @@ namespace DataAccess.Repositories
             dbContext.Rooms.Add(room);
         }
 
-        public void UpdateRoom(int id)
+        public void UpdateRoom(Room room)
         {
-            Room room = GetRoomByID(id);
-            dbContext.Rooms.Update(room);
+            Room roomToUpdate = GetRoomByID(room.ID);
+            // this code might be extended later, for more property updates
+            roomToUpdate.Number = room.Number;
+            dbContext.Rooms.Update(roomToUpdate);
         }
 
         public void DeleteRoom(int id)

@@ -10,6 +10,7 @@ namespace Hotel_API_Project.Data
 {
     public class ApplicationDbContext : IdentityDbContext<EmployeeApplicationUser, IdentityRole<int>, int>
     {
+        public ApplicationDbContext() { }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {

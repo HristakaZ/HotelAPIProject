@@ -31,10 +31,12 @@ namespace DataAccess.Repositories
             dbContext.Employees.Add(employee);
         }
 
-        public void UpdateEmployee(int id)
+        public void UpdateEmployee(EmployeeApplicationUser employee)
         {
-            EmployeeApplicationUser employee = GetEmployeeByID(id);
-            dbContext.Employees.Update(employee);
+            EmployeeApplicationUser employeeToUpdate = GetEmployeeByID(employee.Id);
+            // this code might be extended later, for more property updates
+            employeeToUpdate.UserName = employee.UserName;
+            dbContext.Employees.Update(employeeToUpdate);
         }
 
         public void DeleteEmployee(int id)

@@ -10,7 +10,7 @@ namespace DataAccess.Repositories
         List<Reservation> GetReservations();
         Reservation GetReservationByID(int id);
         void CreateReservation(Reservation reservation);
-        void UpdateReservation(int id);
+        void UpdateReservation(Reservation reservation);
         void DeleteReservation(int id);
     }
 }

@@ -10,7 +10,7 @@ namespace DataAccess.Repositories
         List<EmployeeApplicationUser> GetEmployees();
         EmployeeApplicationUser GetEmployeeByID(int id);
         void CreateEmployee(EmployeeApplicationUser employee);
-        void UpdateEmployee(int id);
+        void UpdateEmployee(EmployeeApplicationUser employee);
         void DeleteEmployee(int id);
     }
 }

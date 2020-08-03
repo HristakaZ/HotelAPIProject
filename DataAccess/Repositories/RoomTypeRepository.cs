@@ -15,7 +15,7 @@ namespace DataAccess.Repositories
             this.dbContext = dbContext;
         }
 
-        public List<RoomType> GetRoomType()
+        public List<RoomType> GetRoomTypes()
         {
             return dbContext.RoomTypes.ToList();
         }
@@ -30,10 +30,12 @@ namespace DataAccess.Repositories
             dbContext.RoomTypes.Add(roomType);
         }
 
-        public void UpdateRoomType(int id)
+        public void UpdateRoomType(RoomType roomType)
         {
-            RoomType roomType = GetRoomTypeByID(id);
-            dbContext.RoomTypes.Update(roomType);
+            RoomType roomTypeToUpdate = GetRoomTypeByID(roomType.ID);
+            // this code might be extended later, for more property updates
+            roomTypeToUpdate.Name = roomType.Name;
+            dbContext.RoomTypes.Update(roomTypeToUpdate);
         }
 
         public void DeleteRoomType(int id)
