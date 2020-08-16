@@ -1,0 +1,67 @@
+﻿@model DataStructure.EmployeeApplicationUser
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h1>Delete</h1>
+
+<h3>Are you sure you want to delete this Employee?</h3>
+
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+
+<script>
+    function getEmployeeIDThroughURL() {
+        let currentURL = window.location.toString();
+        let employeeID = currentURL.substring(currentURL.lastIndexOf('/') + 1);
+        let hiddenInputID = $('#empID');
+        hiddenInputID.attr('value', employeeID);
+    }
+    function deleteEmployee() {
+        $(document).ready(function () {
+            getEmployeeIDThroughURL();
+            let btnEmployeeDelete = $('#btnEmployeeDelete');
+            btnEmployeeDelete.click(function () {
+                let employeeID = parseInt($('#empID').val());
+                let url = 'https://localhost:44357/api/Employee/' + employeeID;
+                $.ajax({
+                    type: 'DELETE',
+                    url: url,
+                    accepts: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(employeeID),
+                    success: function (data) {
+                        alert('Success! Deleted Employee with ID: ' + employeeID);
+                        window.location.href = "https://localhost:44357/Employee/Index";
+                    },
+                    error: function (data) {
+                        alert('Error!: ' + data.responseText);
+                    }
+                });
+            });
+        });
+    }
+</script>
+
+<hr />
+
+<script type="text/javascript">
+    deleteEmployee();
+</script>
+
+<div>
+    <input type="hidden" id="empID" />
+</div>
+
+<div style="margin-bottom: 15px">
+    <input type="submit" name="deleteEmployee" value="Delete The Employee" id="btnEmployeeDelete" />
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

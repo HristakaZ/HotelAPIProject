@@ -1,0 +1,79 @@
+﻿@model DataStructure.RoomType
+
+@{
+    ViewData["Title"] = "Update";
+}
+
+<h1>Update</h1>
+
+<h4>RoomType</h4>
+
+<hr />
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+
+<script>
+    function getRoomTypeIDThroughURL() {
+        let currentURL = window.location.toString();
+        let roomTypeID = currentURL.substring(currentURL.lastIndexOf('/') + 1);
+        let hiddenInputID = $('#roomTypeID');
+        hiddenInputID.attr('value', roomTypeID);
+    }
+    function updateRoomType() {
+        $(document).ready(function () {
+            getRoomTypeIDThroughURL();
+            let btnRoomTypeUpdate = $('#btnRoomTypeUpdate');
+            btnRoomTypeUpdate.click(function () {
+                let roomTypeID = parseInt($('#roomTypeID').val());
+                let roomTypeName = $('#roomTypeName').val();
+                let roomType = {
+                    id: roomTypeID,
+                    name: roomTypeName
+                    /* more info to be added here */
+                };
+                let url = 'https://localhost:44357/api/RoomType/' + roomTypeID;
+                $.ajax({
+                    type: 'PUT',
+                    url: url,
+                    accepts: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(roomType),
+                    success: function (data) {
+                        alert('Success! Edited RoomType with ID: ' + roomTypeID);
+                        window.location.href = "https://localhost:44357/RoomType/Index";
+                    },
+                    error: function (data) {
+                        alert('Error!: ' + data.responseText);
+                    }
+                });
+            });
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    updateRoomType();
+</script>
+
+
+<div>
+    <input type="hidden" id="roomTypeID" />
+</div>
+
+<div style="margin-bottom: 15px">
+    <input type="text" name="roomTypeName" placeholder="RoomType Name" id="roomTypeName" />
+    @*TO DO: CHANGE THE INPUT TYPE TEXTS WITH HTML HELPERS IN ORDER TO AVOID XSS ATTACK! <br />
+        @Html.TextBox("", null, new { name = "Employee Name", placeholder = "Employee Name", id = "empName" })*@
+</div>
+
+<div style="margin-bottom: 15px">
+    <input type="submit" name="updateRoomType" value="Update The RoomType" id="btnRoomTypeUpdate" />
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

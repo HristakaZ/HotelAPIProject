@@ -5,13 +5,43 @@
 }
 
 <h1>Employees</h1>
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<!--TO DO: make the needed API calls to obtain the info-->
+<script type="text/javascript">
+    function getEmployees() {
+        $(document).ready(function () {
+            let url = 'https://localhost:44357/api/Employee';
+            let ulEmployees = $('#ulEmployees');
+            $.ajax({
+                type: 'GET',
+                url: url,
+                contentType: 'application/json',
+                accepts: 'json',
+                success: function (data) {
+                    $.each(data, function (index, val) {
+                        /* TO DO: MAKE THE DELETE PAGE*/
+                        let linkForUpdate = $('<a>');
+                        linkForUpdate.attr('href', 'https://localhost:44357/Employee/Update/' + val.id);
+                        linkForUpdate.text('Update Employee');
+                        ulEmployees.append(linkForUpdate);
+                        let linkForDelete = $('<a>');
+                        linkForDelete.attr('href', 'https://localhost:44357/Employee/Delete/' + val.id);
+                        linkForDelete.text('Delete Employee');
+                        ulEmployees.append('</br>');
+                        ulEmployees.append(linkForDelete);
+                        ulEmployees.append('</br>');
+                        ulEmployees.append('Employee ID: ' + val.id + '</br>' + 'Employee Name: ' + val.userName +
+                            '</br>' + 'Employee Position:' + ' ' + val.position + '</br>' + '</br>');
+                    })
+                }
+            });
 
-<!--TO DO : make the needed API calls to obtain the info-->
-@*<script type="text/javascript">
-    $(document).ready(function () {
-        $.ajax({
-            type: 'GET',
-            url: ''
         });
-    });
-</script>*@
+    }
+</script>
+
+<script>
+    getEmployees();
+</script>
+
+<ul id="ulEmployees"></ul>

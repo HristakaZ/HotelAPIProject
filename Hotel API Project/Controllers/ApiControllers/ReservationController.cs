@@ -14,9 +14,11 @@ namespace Hotel_API_Project.Controllers.ApiControllers
     public class ReservationController : ControllerBase
     {
         private IReservationRepository iReservationRepository;
-        public ReservationController(IReservationRepository iReservationRepository)
+        private IUnitOfWork iUnitOfWork;
+        public ReservationController(IReservationRepository iReservationRepository, IUnitOfWork iUnitOfWork)
         {
             this.iReservationRepository = iReservationRepository;
+            this.iUnitOfWork = iUnitOfWork;
         }
         // GET: api/<ReservationController>
         [HttpGet]
@@ -49,6 +51,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
             {
                 iReservationRepository.CreateReservation(reservation);
                 Uri uri = new Uri(Url.Link("GetReservationByID", new { Id = reservation.ID }));
+                iUnitOfWork.Save();
                 return Created(uri, reservation.ID.ToString());
             }
             catch (Exception ex)
@@ -65,6 +68,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
             {
                 reservation.ID = id;
                 iReservationRepository.UpdateReservation(reservation);
+                iUnitOfWork.Save();
                 return Ok(reservation);
             }
             else
@@ -81,6 +85,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
             if (reservationToDelete != null)
             {
                 iReservationRepository.DeleteReservation(reservationToDelete.ID);
+                iUnitOfWork.Save();
                 return Ok(reservationToDelete);
             }
             else

@@ -48,6 +48,7 @@ namespace Hotel_API_Project
             services.AddScoped<IReservationRepository, ReservationRepository>();
             services.AddScoped<IPositionRepository, PositionRepository>();
             services.AddScoped<IRoomTypeRepository, RoomTypeRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

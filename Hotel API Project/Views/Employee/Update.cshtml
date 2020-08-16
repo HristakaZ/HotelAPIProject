@@ -1,0 +1,78 @@
+﻿@model DataStructure.EmployeeApplicationUser
+
+@{
+    ViewData["Title"] = "Update";
+}
+
+<h1>Update</h1>
+
+<h4>Employees</h4>
+
+<hr />
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+
+<script>
+    function getEmployeeIDThroughURL() {
+        let currentURL = window.location.toString();
+        let employeeID = currentURL.substring(currentURL.lastIndexOf('/') + 1);
+        let hiddenInputID = $('#empID');
+        hiddenInputID.attr('value', employeeID);
+    }
+    function updateEmployee() {
+        $(document).ready(function () {
+            getEmployeeIDThroughURL();
+            let btnEmployeeUpdate = $('#btnEmployeeUpdate');
+            btnEmployeeUpdate.click(function () {
+                let employeeID = parseInt($('#empID').val());
+                let employeeName = $('#empName').val();
+                let employee = {
+                    id: employeeID,
+                    userName: employeeName
+                };
+                let url = 'https://localhost:44357/api/Employee/' + employeeID;
+                $.ajax({
+                    type: 'PUT',
+                    url: url,
+                    accepts: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(employee),
+                    success: function (data) {
+                        alert('Success! Edited Employee with ID: ' + employeeID);
+                        window.location.href = "https://localhost:44357/Employee/Index";
+                    },
+                    error: function (data) {
+                        alert('Error!: ' + data.responseText);
+                    }
+                });
+            });
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    updateEmployee();
+</script>
+
+
+<div>
+    <input type="hidden" id="empID" />
+</div>
+
+<div style="margin-bottom: 15px">
+    <input type="text" name="Employee Name" placeholder="Employee Name" id="empName" />
+    @*TO DO: CHANGE THE INPUT TYPE TEXTS WITH HTML HELPERS IN ORDER TO AVOID XSS ATTACK! <br />
+    @Html.TextBox("", null, new { name = "Employee Name", placeholder = "Employee Name", id = "empName" })*@
+</div>
+
+<div style="margin-bottom: 15px">
+    <input type="submit" name="updateEmployee" value="Update The Employee" id="btnEmployeeUpdate" />
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

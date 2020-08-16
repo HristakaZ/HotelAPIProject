@@ -14,9 +14,11 @@ namespace Hotel_API_Project.Controllers.ApiControllers
     public class RoomController : ControllerBase
     {
         private IRoomRepository iRoomRepository;
-        public RoomController(IRoomRepository iRoomRepository)
+        private IUnitOfWork iUnitOfWork;
+        public RoomController(IRoomRepository iRoomRepository, IUnitOfWork iUnitOfWork)
         {
             this.iRoomRepository = iRoomRepository;
+            this.iUnitOfWork = iUnitOfWork;
         }
         // GET: api/<RoomController>
         [HttpGet]
@@ -49,6 +51,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
             {
                 iRoomRepository.CreateRoom(room);
                 Uri uri = new Uri(Url.Link("GetRoomByID", new { Id = room.ID }));
+                iUnitOfWork.Save();
                 return Created(uri, room.ID.ToString());
             }
             catch (Exception ex)
@@ -65,6 +68,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
             {
                 room.ID = id;
                 iRoomRepository.UpdateRoom(room);
+                iUnitOfWork.Save();
                 return Ok(room);
             }
             else
@@ -81,6 +85,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
             if (roomToDelete != null)
             {
                 iRoomRepository.DeleteRoom(roomToDelete.ID);
+                iUnitOfWork.Save();
                 return Ok(roomToDelete);
             }
             else

@@ -1,0 +1,59 @@
+﻿@model DataStructure.PositionApplicationRole
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+
+<h1>Create A Position</h1>
+
+<hr />
+<script type="text/javascript">
+    function createPosition() {
+        $(document).ready(function () {
+            let url = 'https://localhost:44357/api/Position';
+            let btnPositionCreate = $('#btnPositionCreate');
+            btnPositionCreate.click(function () {
+                let positionName = $('#positionName').val();
+                let position = {
+                    name: positionName
+                    /* more info to be added here */
+                };
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    accepts: 'json',
+                    data: JSON.stringify(position),
+                    success: function (data) {
+                        alert('Success, send the data to the create action of the position controller. Created Position with ID: ' + data);
+                        window.location.href = "https://localhost:44357/Position/Index";
+                    },
+                    error: function (data) {
+                        alert('Error: ' + data.responseText);
+                    }
+                });
+            });
+
+        });
+    }
+</script>
+
+<script>
+    createPosition();
+</script>
+
+<div style="margin-bottom: 15px">
+    <input type="text" name="positionName" placeholder="Position Name" id="positionName" />
+    @*TO DO: CHANGE THE INPUT TYPE TEXTS WITH HTML HELPERS IN ORDER TO AVOID XSS ATTACK! <br />
+        @Html.TextBox("", null, new { name= "Employee Name", placeholder = "Employee Name", id = "empName"})*@
+</div>
+
+<div style="margin-bottom: 15px">
+    <input type="submit" name="createPosition" value="Create A Position" id="btnPositionCreate" />
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

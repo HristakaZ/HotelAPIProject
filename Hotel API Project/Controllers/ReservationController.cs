@@ -14,5 +14,17 @@ namespace Hotel_API_Project.Controllers
         {
             return View();
         }
+        public ActionResult Create()
+        {
+            return View();
+        }
+        public ActionResult Update()
+        {
+            return View();
+        }
+        public ActionResult Delete()
+        {
+            return View();
+        }
     }
 }

@@ -1,0 +1,77 @@
+﻿@model DataStructure.Reservation
+
+@{
+    ViewData["Title"] = "Update";
+}
+
+<h1>Update</h1>
+
+<h4>Reservation</h4>
+
+<hr />
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+
+<script>
+    function getReservationIDThroughURL() {
+        let currentURL = window.location.toString();
+        let reservationID = currentURL.substring(currentURL.lastIndexOf('/') + 1);
+        let hiddenInputID = $('#reservationID');
+        hiddenInputID.attr('value', reservationID);
+    }
+    function updateReservation() {
+        $(document).ready(function () {
+            getReservationIDThroughURL();
+            let btnReservationUpdate = $('#btnReservationUpdate');
+            btnReservationUpdate.click(function () {
+                let reservationID = parseInt($('#reservationID').val());
+                let reservation = {
+                    id: reservationID
+                    /* more info to be put here */
+                };
+                let url = 'https://localhost:44357/api/Reservation/' + reservationID;
+                $.ajax({
+                    type: 'PUT',
+                    url: url,
+                    accepts: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(reservation),
+                    success: function (data) {
+                        alert('Success! Edited Reservation with ID: ' + reservationID);
+                        window.location.href = "https://localhost:44357/Reservation/Index";
+                    },
+                    error: function (data) {
+                        alert('Error!: ' + data.responseText);
+                    }
+                });
+            });
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    updateReservation();
+</script>
+
+
+<div>
+    <input type="hidden" id="reservationID" />
+</div>
+
+<div style="margin-bottom: 15px">
+    <input type="text" name="Reservation Name" placeholder="Reservation Name" id="reservationName" />
+    @*TO DO: CHANGE THE INPUT TYPE TEXTS WITH HTML HELPERS IN ORDER TO AVOID XSS ATTACK! <br />
+        @Html.TextBox("", null, new { name = "Employee Name", placeholder = "Employee Name", id = "empName" })*@
+</div>
+
+<div style="margin-bottom: 15px">
+    <input type="submit" name="updateReservation" value="Update The Reservation" id="btnReservationUpdate" />
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -33,15 +33,21 @@ namespace DataAccess.Repositories
         public void UpdatePosition(PositionApplicationRole position)
         {
             PositionApplicationRole positionToUpdate = GetPositionByID(position.Id);
-            // this code might be extended later, for more property updates
-            positionToUpdate.Name = position.Name;
-            dbContext.Positions.Update(positionToUpdate);
+            if (positionToUpdate != null)
+            {
+                // this code might be extended later, for more property updates
+                positionToUpdate.Name = position.Name;
+                dbContext.Positions.Update(positionToUpdate);
+            }
         }
 
         public void DeletePosition(int id)
         {
             PositionApplicationRole position = GetPositionByID(id);
-            dbContext.Positions.Remove(position);
+            if (position != null)
+            {
+                dbContext.Positions.Remove(position);
+            }
         }
 
     }

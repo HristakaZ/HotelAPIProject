@@ -1,0 +1,67 @@
+﻿@model DataStructure.Guest
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h1>Delete</h1>
+
+<h3>Are you sure you want to delete this Guest?</h3>
+
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+
+<script>
+    function getGuestIDThroughURL() {
+        let currentURL = window.location.toString();
+        let guestID = currentURL.substring(currentURL.lastIndexOf('/') + 1);
+        let hiddenInputID = $('#guestID');
+        hiddenInputID.attr('value', guestID);
+    }
+    function deleteGuest() {
+        $(document).ready(function () {
+            getGuestIDThroughURL();
+            let btnGuestDelete = $('#btnGuestDelete');
+            btnGuestDelete.click(function () {
+                let guestID = parseInt($('#guestID').val());
+                let url = 'https://localhost:44357/api/Guest/' + guestID;
+                $.ajax({
+                    type: 'DELETE',
+                    url: url,
+                    accepts: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(guestID),
+                    success: function (data) {
+                        alert('Success! Deleted Guest with ID: ' + guestID);
+                        window.location.href = "https://localhost:44357/Guest/Index";
+                    },
+                    error: function (data) {
+                        alert('Error!: ' + data.responseText);
+                    }
+                });
+            });
+        });
+    }
+</script>
+
+<hr />
+
+<script type="text/javascript">
+    deleteGuest();
+</script>
+
+<div>
+    <input type="hidden" id="guestID" />
+</div>
+
+<div style="margin-bottom: 15px">
+    <input type="submit" name="deleteGuest" value="Delete The Guest" id="btnGuestDelete" />
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

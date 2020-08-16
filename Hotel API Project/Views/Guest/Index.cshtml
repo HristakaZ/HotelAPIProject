@@ -5,13 +5,43 @@
 }
 
 <h1>Guests</h1>
-
-<!--TO DO : make the needed API calls to obtain the info-->
-@*<script type="text/javascript">
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<!--TO DO: make the needed API calls to obtain the info-->
+<script type="text/javascript">
+    function getGuests() {
         $(document).ready(function () {
+            let url = 'https://localhost:44357/api/Guest';
+            let ulGuests = $('#ulGuests');
             $.ajax({
                 type: 'GET',
-                url: ''
+                url: url,
+                contentType: 'application/json',
+                accepts: 'json',
+                success: function (data) {
+                    $.each(data, function (index, val) {
+                        /* TO DO: MAKE THE DELETE PAGE*/
+                        let linkForUpdate = $('<a>');
+                        linkForUpdate.attr('href', 'https://localhost:44357/Guest/Update/' + val.id);
+                        linkForUpdate.text('Update Guest');
+                        ulGuests.append(linkForUpdate);
+                        let linkForDelete = $('<a>');
+                        linkForDelete.attr('href', 'https://localhost:44357/Guest/Delete/' + val.id);
+                        linkForDelete.text('Delete Guest');
+                        ulGuests.append('</br>');
+                        ulGuests.append(linkForDelete);
+                        ulGuests.append('</br>');
+                        ulGuests.append('Guest ID: ' + val.id + '</br>' + 'Guest Name: ' + val.name +
+                            '</br>' + 'Guest Reservations:' + ' ' + val.reservations + '</br>' + '</br>');
+                    })
+                }
             });
+
         });
-    </script>*@
+    }
+</script>
+
+<script>
+    getGuests();
+</script>
+
+<ul id="ulGuests"></ul>

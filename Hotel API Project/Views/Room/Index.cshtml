@@ -5,13 +5,43 @@
 }
 
 <h1>Rooms</h1>
-
-<!--TO DO : make the needed API calls to obtain the info-->
-@*<script type="text/javascript">
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<!--TO DO: make the needed API calls to obtain the info-->
+<script type="text/javascript">
+    function getRooms() {
         $(document).ready(function () {
+            let url = 'https://localhost:44357/api/Room';
+            let ulRooms = $('#ulRooms');
             $.ajax({
                 type: 'GET',
-                url: ''
+                url: url,
+                contentType: 'application/json',
+                accepts: 'json',
+                success: function (data) {
+                    $.each(data, function (index, val) {
+                        /* TO DO: MAKE THE DELETE PAGE*/
+                        let linkForUpdate = $('<a>');
+                        linkForUpdate.attr('href', 'https://localhost:44357/Room/Update/' + val.id);
+                        ulRooms.append('</br>');
+                        linkForUpdate.text('Update Room');
+                        ulRooms.append(linkForUpdate);
+                        let linkForDelete = $('<a>');
+                        linkForDelete.attr('href', 'https://localhost:44357/Room/Delete/' + val.id);
+                        linkForDelete.text('Delete Room');
+                        ulRooms.append('</br>');
+                        ulRooms.append(linkForDelete);
+                        ulRooms.append('</br>');
+                        ulRooms.append('Room ID: ' + val.id + '</br>' + 'Room Number: ' + val.number);
+                    })
+                }
             });
+
         });
-    </script>*@
+    }
+</script>
+
+<script>
+    getRooms();
+</script>
+
+<ul id="ulRooms"></ul>

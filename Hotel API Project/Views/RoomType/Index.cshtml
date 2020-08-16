@@ -1,17 +1,47 @@
 ﻿@model IEnumerable<DataStructure.RoomType>
 
 @{
-    ViewData["Title"] = "Room Types";
+    ViewData["Title"] = "RoomTypes";
 }
 
-<h1>Room Types</h1>
-
-<!--TO DO : make the needed API calls to obtain the info-->
-@*<script type="text/javascript">
+<h1>RoomTypes</h1>
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<!--TO DO: make the needed API calls to obtain the info-->
+<script type="text/javascript">
+    function getRoomTypes() {
         $(document).ready(function () {
+            let url = 'https://localhost:44357/api/RoomType';
+            let ulRoomTypes = $('#ulRoomTypes');
             $.ajax({
                 type: 'GET',
-                url: ''
+                url: url,
+                contentType: 'application/json',
+                accepts: 'json',
+                success: function (data) {
+                    $.each(data, function (index, val) {
+                        /* TO DO: MAKE THE DELETE PAGE*/
+                        let linkForUpdate = $('<a>');
+                        linkForUpdate.attr('href', 'https://localhost:44357/RoomType/Update/' + val.id);
+                        ulRoomTypes.append('</br>');
+                        linkForUpdate.text('Update RoomType');
+                        ulRoomTypes.append(linkForUpdate);
+                        let linkForDelete = $('<a>');
+                        linkForDelete.attr('href', 'https://localhost:44357/RoomType/Delete/' + val.id);
+                        linkForDelete.text('Delete RoomType');
+                        ulRoomTypes.append('</br>');
+                        ulRoomTypes.append(linkForDelete);
+                        ulRoomTypes.append('</br>');
+                        ulRoomTypes.append('RoomType ID: ' + val.id + '</br>' + 'RoomType Name: ' + val.name);
+                    })
+                }
             });
+
         });
-    </script>*@
+    }
+</script>
+
+<script>
+    getRoomTypes();
+</script>
+
+<ul id="ulRoomTypes"></ul>

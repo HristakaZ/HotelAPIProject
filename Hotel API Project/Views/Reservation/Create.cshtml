@@ -1,0 +1,57 @@
+﻿@model DataStructure.Reservation
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+
+<h1>Create A Reservation</h1>
+
+<hr />
+<script type="text/javascript">
+    function createReservation() {
+        $(document).ready(function () {
+            let url = 'https://localhost:44357/api/Reservation';
+            let btnReservationCreate = $('#btnReservationCreate');
+            btnReservationCreate.click(function () {
+                let reservation = {
+                    /* info to be added here */
+                };
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    accepts: 'json',
+                    data: JSON.stringify(reservation),
+                    success: function (data) {
+                        alert('Success, send the data to the create action of the reservation controller. Created Reservation with ID: ' + data);
+                        window.location.href = "https://localhost:44357/Reservation/Index";
+                    },
+                    error: function (data) {
+                        alert('Error: ' + data.responseText);
+                    }
+                });
+            });
+
+        });
+    }
+</script>
+
+<script>
+    createReservation();
+</script>
+
+<div style="margin-bottom: 15px">
+    <input type="text" name="reservationDate" placeholder="Reservation Date" id="reservationDate" />
+    @*TO DO: CHANGE THE INPUT TYPE TEXTS WITH HTML HELPERS IN ORDER TO AVOID XSS ATTACK! <br />
+        @Html.TextBox("", null, new { name= "Employee Name", placeholder = "Employee Name", id = "empName"})*@
+</div>
+
+<div style="margin-bottom: 15px">
+    <input type="submit" name="createReservation" value="Create A Reservation" id="btnReservationCreate" />
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

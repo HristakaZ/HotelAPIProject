@@ -33,15 +33,21 @@ namespace DataAccess.Repositories
         public void UpdateGuest(Guest guest)
         {
             Guest guestToUpdate = GetGuestByID(guest.ID);
-            // this code might be extended later, for more property updates
-            guestToUpdate.Name = guest.Name;
-            dbContext.Guests.Update(guestToUpdate);
+            if (guestToUpdate != null)
+            {
+                // this code might be extended later, for more property updates
+                guestToUpdate.Name = guest.Name;
+                dbContext.Guests.Update(guestToUpdate);
+            }
         }
 
         public void DeleteGuest(int id)
         {
             Guest guest = GetGuestByID(id);
-            dbContext.Guests.Remove(guest);
+            if (guest != null)
+            {
+                dbContext.Guests.Remove(guest);
+            }
         }
 
     }

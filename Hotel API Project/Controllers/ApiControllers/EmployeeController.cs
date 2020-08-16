@@ -15,9 +15,11 @@ namespace Hotel_API_Project.Controllers.ApiControllers
     public class EmployeeController : ControllerBase
     {
         private IEmployeeRepository iEmployeeRepository;
-        public EmployeeController(IEmployeeRepository iEmployeeRepository)
+        private IUnitOfWork iUnitOfWork;
+        public EmployeeController(IEmployeeRepository iEmployeeRepository, IUnitOfWork iUnitOfWork)
         {
             this.iEmployeeRepository = iEmployeeRepository;
+            this.iUnitOfWork = iUnitOfWork;
         }
         // GET: api/<EmployeeController>
         [HttpGet]
@@ -50,6 +52,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
             {
                 iEmployeeRepository.CreateEmployee(employee);
                 Uri uri = new Uri(Url.Link("GetEmployeeByID", new { Id = employee.Id }));
+                iUnitOfWork.Save();
                 return Created(uri, employee.Id.ToString());
             }
             catch (Exception ex)
@@ -66,6 +69,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
             {
                 employee.Id = id;
                 iEmployeeRepository.UpdateEmployee(employee);
+                iUnitOfWork.Save();
                 return Ok(employee);
             }
             else
@@ -73,6 +77,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
                 return NotFound("Employee with ID " + id.ToString() + " was not found.");
             }
         }
+
 
         // DELETE api/<EmployeeController>/5
         [HttpDelete("{id}")]
@@ -82,6 +87,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
             if (employeeToDelete != null)
             {
                 iEmployeeRepository.DeleteEmployee(employeeToDelete.Id);
+                iUnitOfWork.Save();
                 return Ok(employeeToDelete);
             }
             else

@@ -1,0 +1,59 @@
+﻿@model DataStructure.RoomType
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+
+<h1>Create A RoomType</h1>
+
+<hr />
+<script type="text/javascript">
+    function createRoomType() {
+        $(document).ready(function () {
+            let url = 'https://localhost:44357/api/RoomType';
+            let btnRoomTypeCreate = $('#btnRoomTypeCreate');
+            btnRoomTypeCreate.click(function () {
+                let roomTypeName = $('#roomTypeName').val();
+                let roomType = {
+                    name: roomTypeName
+                    /* more info to be added here */
+                };
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    accepts: 'json',
+                    data: JSON.stringify(roomType),
+                    success: function (data) {
+                        alert('Success, send the data to the create action of the roomtype controller. Created RoomType with ID: ' + data);
+                        window.location.href = "https://localhost:44357/RoomType/Index";
+                    },
+                    error: function (data) {
+                        alert('Error: ' + data.responseText);
+                    }
+                });
+            });
+
+        });
+    }
+</script>
+
+<script>
+    createRoomType();
+</script>
+
+<div style="margin-bottom: 15px">
+    <input type="text" name="roomTypeName" placeholder="Room Type Name" id="roomTypeName" />
+    @*TO DO: CHANGE THE INPUT TYPE TEXTS WITH HTML HELPERS IN ORDER TO AVOID XSS ATTACK! <br />
+        @Html.TextBox("", null, new { name= "Employee Name", placeholder = "Employee Name", id = "empName"})*@
+</div>
+
+<div style="margin-bottom: 15px">
+    <input type="submit" name="createRoomType" value="Create A RoomType" id="btnRoomTypeCreate" />
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

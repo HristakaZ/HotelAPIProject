@@ -34,15 +34,21 @@ namespace DataAccess.Repositories
         public void UpdateEmployee(EmployeeApplicationUser employee)
         {
             EmployeeApplicationUser employeeToUpdate = GetEmployeeByID(employee.Id);
-            // this code might be extended later, for more property updates
-            employeeToUpdate.UserName = employee.UserName;
-            dbContext.Employees.Update(employeeToUpdate);
+            if (employeeToUpdate != null)
+            {
+                // this code might be extended later, for more property updates
+                employeeToUpdate.UserName = employee.UserName;
+                dbContext.Employees.Update(employeeToUpdate);
+            }
         }
 
         public void DeleteEmployee(int id)
         {
             EmployeeApplicationUser employee = GetEmployeeByID(id);
-            dbContext.Employees.Remove(employee);
+            if (employee != null)
+            {
+                dbContext.Employees.Remove(employee);
+            }
         }
 
     }

@@ -5,13 +5,42 @@
 }
 
 <h1>Reservations</h1>
-
-<!--TO DO : make the needed API calls to obtain the info-->
-@*<script type="text/javascript">
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<!--TO DO: make the needed API calls to obtain the info-->
+<script type="text/javascript">
+    function getReservations() {
         $(document).ready(function () {
+            let url = 'https://localhost:44357/api/Reservation';
+            let ulReservations = $('#ulReservations');
             $.ajax({
                 type: 'GET',
-                url: ''
+                url: url,
+                contentType: 'application/json',
+                accepts: 'json',
+                success: function (data) {
+                    $.each(data, function (index, val) {
+                        /* TO DO: MAKE THE DELETE PAGE*/
+                        let linkForUpdate = $('<a>');
+                        linkForUpdate.attr('href', 'https://localhost:44357/Reservation/Update/' + val.id);
+                        linkForUpdate.text('Update Reservation');
+                        ulReservations.append(linkForUpdate);
+                        let linkForDelete = $('<a>');
+                        linkForDelete.attr('href', 'https://localhost:44357/Reservation/Delete/' + val.id);
+                        linkForDelete.text('Delete Reservation');
+                        ulReservations.append('</br>');
+                        ulReservations.append(linkForDelete);
+                        ulReservations.append('</br>');
+                        ulReservations.append('Reservation ID: ' + val.id + '</br>');
+                    })
+                }
             });
+
         });
-    </script>*@
+    }
+</script>
+
+<script>
+    getReservations();
+</script>
+
+<ul id="ulReservations"></ul>

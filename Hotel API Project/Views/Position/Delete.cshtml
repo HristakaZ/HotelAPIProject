@@ -1,0 +1,67 @@
+﻿@model DataStructure.PositionApplicationRole
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h1>Delete</h1>
+
+<h3>Are you sure you want to delete this Position?</h3>
+
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+
+<script>
+    function getPositionIDThroughURL() {
+        let currentURL = window.location.toString();
+        let positionID = currentURL.substring(currentURL.lastIndexOf('/') + 1);
+        let hiddenInputID = $('#positionID');
+        hiddenInputID.attr('value', positionID);
+    }
+    function deletePosition() {
+        $(document).ready(function () {
+            getPositionIDThroughURL();
+            let btnPositionDelete = $('#btnPositionDelete');
+            btnPositionDelete.click(function () {
+                let positionID = parseInt($('#positionID').val());
+                let url = 'https://localhost:44357/api/Position/' + positionID;
+                $.ajax({
+                    type: 'DELETE',
+                    url: url,
+                    accepts: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(positionID),
+                    success: function (data) {
+                        alert('Success! Deleted Position with ID: ' + positionID);
+                        window.location.href = "https://localhost:44357/Position/Index";
+                    },
+                    error: function (data) {
+                        alert('Error!: ' + data.responseText);
+                    }
+                });
+            });
+        });
+    }
+</script>
+
+<hr />
+
+<script type="text/javascript">
+    deletePosition();
+</script>
+
+<div>
+    <input type="hidden" id="positionID" />
+</div>
+
+<div style="margin-bottom: 15px">
+    <input type="submit" name="deletePosition" value="Delete The Position" id="btnPositionDelete" />
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,67 @@
+﻿@model DataStructure.Room
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h1>Delete</h1>
+
+<h3>Are you sure you want to delete this Room?</h3>
+
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+
+<script>
+    function getRoomIDThroughURL() {
+        let currentURL = window.location.toString();
+        let roomID = currentURL.substring(currentURL.lastIndexOf('/') + 1);
+        let hiddenInputID = $('#roomID');
+        hiddenInputID.attr('value', roomID);
+    }
+    function deleteRoom() {
+        $(document).ready(function () {
+            getRoomIDThroughURL();
+            let btnRoomDelete = $('#btnRoomDelete');
+            btnRoomDelete.click(function () {
+                let roomID = parseInt($('#roomID').val());
+                let url = 'https://localhost:44357/api/Room/' + roomID;
+                $.ajax({
+                    type: 'DELETE',
+                    url: url,
+                    accepts: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(roomID),
+                    success: function (data) {
+                        alert('Success! Deleted Room with ID: ' + roomID);
+                        window.location.href = "https://localhost:44357/Room/Index";
+                    },
+                    error: function (data) {
+                        alert('Error!: ' + data.responseText);
+                    }
+                });
+            });
+        });
+    }
+</script>
+
+<hr />
+
+<script type="text/javascript">
+    deleteRoom();
+</script>
+
+<div>
+    <input type="hidden" id="roomID" />
+</div>
+
+<div style="margin-bottom: 15px">
+    <input type="submit" name="deleteRoom" value="Delete The Room" id="btnRoomDelete" />
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

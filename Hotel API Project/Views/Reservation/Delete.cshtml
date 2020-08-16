@@ -1,0 +1,67 @@
+﻿@model DataStructure.Reservation
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h1>Delete</h1>
+
+<h3>Are you sure you want to delete this Reservation?</h3>
+
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+
+<script>
+    function getReservationIDThroughURL() {
+        let currentURL = window.location.toString();
+        let reservationID = currentURL.substring(currentURL.lastIndexOf('/') + 1);
+        let hiddenInputID = $('#reservationID');
+        hiddenInputID.attr('value', reservationID);
+    }
+    function deleteReservation() {
+        $(document).ready(function () {
+            getReservationIDThroughURL();
+            let btnReservationDelete = $('#btnReservationDelete');
+            btnReservationDelete.click(function () {
+                let reservationID = parseInt($('#reservationID').val());
+                let url = 'https://localhost:44357/api/Reservation/' + reservationID;
+                $.ajax({
+                    type: 'DELETE',
+                    url: url,
+                    accepts: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(reservationID),
+                    success: function (data) {
+                        alert('Success! Deleted Reservation with ID: ' + reservationID);
+                        window.location.href = "https://localhost:44357/Reservation/Index";
+                    },
+                    error: function (data) {
+                        alert('Error!: ' + data.responseText);
+                    }
+                });
+            });
+        });
+    }
+</script>
+
+<hr />
+
+<script type="text/javascript">
+    deleteReservation();
+</script>
+
+<div>
+    <input type="hidden" id="reservationID" />
+</div>
+
+<div style="margin-bottom: 15px">
+    <input type="submit" name="deleteReservation" value="Delete The Reservation" id="btnReservationDelete" />
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,79 @@
+﻿@model DataStructure.Room
+
+@{
+    ViewData["Title"] = "Update";
+}
+
+<h1>Update</h1>
+
+<h4>Room</h4>
+
+<hr />
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+
+<script>
+    function getRoomIDThroughURL() {
+        let currentURL = window.location.toString();
+        let roomID = currentURL.substring(currentURL.lastIndexOf('/') + 1);
+        let hiddenInputID = $('#roomID');
+        hiddenInputID.attr('value', roomID);
+    }
+    function updateRoom() {
+        $(document).ready(function () {
+            getRoomIDThroughURL();
+            let btnRoomUpdate = $('#btnRoomUpdate');
+            btnRoomUpdate.click(function () {
+                let roomID = parseInt($('#roomID').val());
+                let roomNumber = parseInt($('#roomNumber').val());
+                let room = {
+                    id: roomID,
+                    number: roomNumber
+                    /* more info to be added here */
+                };
+                let url = 'https://localhost:44357/api/Room/' + roomID;
+                $.ajax({
+                    type: 'PUT',
+                    url: url,
+                    accepts: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(room),
+                    success: function (data) {
+                        alert('Success! Edited Room with ID: ' + roomID);
+                        window.location.href = "https://localhost:44357/Room/Index";
+                    },
+                    error: function (data) {
+                        alert('Error!: ' + data.responseText);
+                    }
+                });
+            });
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    updateRoom();
+</script>
+
+
+<div>
+    <input type="hidden" id="roomID" />
+</div>
+
+<div style="margin-bottom: 15px">
+    <input type="text" name="Room Number" placeholder="Room Number" id="roomNumber" />
+    @*TO DO: CHANGE THE INPUT TYPE TEXTS WITH HTML HELPERS IN ORDER TO AVOID XSS ATTACK! <br />
+        @Html.TextBox("", null, new { name = "Employee Name", placeholder = "Employee Name", id = "empName" })*@
+</div>
+
+<div style="margin-bottom: 15px">
+    <input type="submit" name="updateRoom" value="Update The Room" id="btnRoomUpdate" />
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

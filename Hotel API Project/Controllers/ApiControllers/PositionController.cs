@@ -14,9 +14,11 @@ namespace Hotel_API_Project.Controllers.ApiControllers
     public class PositionController : ControllerBase
     {
         private IPositionRepository iPositionRepository;
-        public PositionController(IPositionRepository iPositionRepository)
+        private IUnitOfWork iUnitOfWork;
+        public PositionController(IPositionRepository iPositionRepository, IUnitOfWork iUnitOfWork)
         {
             this.iPositionRepository = iPositionRepository;
+            this.iUnitOfWork = iUnitOfWork;
         }
         // GET: api/<PositionController>
         [HttpGet]
@@ -49,6 +51,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
             {
                 iPositionRepository.CreatePosition(position);
                 Uri uri = new Uri(Url.Link("GetPositionByID", new { Id = position.Id }));
+                iUnitOfWork.Save();
                 return Created(uri, position.Id.ToString());
             }
             catch (Exception ex)
@@ -65,6 +68,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
             {
                 position.Id = id;
                 iPositionRepository.UpdatePosition(position);
+                iUnitOfWork.Save();
                 return Ok(position);
             }
             else
@@ -81,6 +85,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
             if (positionToDelete != null)
             {
                 iPositionRepository.DeletePosition(positionToDelete.Id);
+                iUnitOfWork.Save();
                 return Ok(positionToDelete);
             }
             else

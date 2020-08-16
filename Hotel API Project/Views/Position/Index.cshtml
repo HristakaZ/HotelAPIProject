@@ -5,13 +5,43 @@
 }
 
 <h1>Positions</h1>
-
-<!--TO DO : make the needed API calls to obtain the info-->
-@*<script type="text/javascript">
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<!--TO DO: make the needed API calls to obtain the info-->
+<script type="text/javascript">
+    function getPositions() {
         $(document).ready(function () {
+            let url = 'https://localhost:44357/api/Position';
+            let ulPositions = $('#ulPositions');
             $.ajax({
                 type: 'GET',
-                url: ''
+                url: url,
+                contentType: 'application/json',
+                accepts: 'json',
+                success: function (data) {
+                    $.each(data, function (index, val) {
+                        /* TO DO: MAKE THE DELETE PAGE*/
+                        let linkForUpdate = $('<a>');
+                        linkForUpdate.attr('href', 'https://localhost:44357/Position/Update/' + val.id);
+                        linkForUpdate.text('Update Position');
+                        ulPositions.append(linkForUpdate);
+                        let linkForDelete = $('<a>');
+                        linkForDelete.attr('href', 'https://localhost:44357/Position/Delete/' + val.id);
+                        linkForDelete.text('Delete Position');
+                        ulPositions.append('</br>');
+                        ulPositions.append(linkForDelete);
+                        ulPositions.append('</br>');
+                        ulPositions.append('Position ID: ' + val.id + '</br>' + 'Position Name: ' + val.name +
+                            '</br>');
+                    })
+                }
             });
+
         });
-    </script>*@
+    }
+</script>
+
+<script>
+    getPositions();
+</script>
+
+<ul id="ulPositions"></ul>
