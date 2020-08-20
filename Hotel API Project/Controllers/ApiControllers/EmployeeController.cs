@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using DataAccess.Repositories;
 using DataStructure;
@@ -16,16 +17,24 @@ namespace Hotel_API_Project.Controllers.ApiControllers
     {
         private IEmployeeRepository iEmployeeRepository;
         private IUnitOfWork iUnitOfWork;
-        public EmployeeController(IEmployeeRepository iEmployeeRepository, IUnitOfWork iUnitOfWork)
+        private HtmlEncoder htmlEncoder;
+        public EmployeeController(IEmployeeRepository iEmployeeRepository, IUnitOfWork iUnitOfWork, HtmlEncoder htmlEncoder)
         {
             this.iEmployeeRepository = iEmployeeRepository;
             this.iUnitOfWork = iUnitOfWork;
+            this.htmlEncoder = htmlEncoder;
         }
         // GET: api/<EmployeeController>
         [HttpGet]
         public List<EmployeeApplicationUser> GetEmployees()
         {
             List<EmployeeApplicationUser> employees = iEmployeeRepository.GetEmployees();
+            /*encoding(against xss) each username at the get request, so as to store the entity column in its plain form in the database
+             note: this can be extended to a greater extent(encode other properties besides the username)*/
+            employees.ForEach(x => {
+                string encodedEmployeeUserName = htmlEncoder.Encode(x.UserName);
+                x.UserName = encodedEmployeeUserName;
+            });
             return employees;
         }
 

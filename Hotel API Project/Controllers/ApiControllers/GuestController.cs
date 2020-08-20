@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using DataAccess.Repositories;
 using DataStructure;
@@ -15,16 +16,22 @@ namespace Hotel_API_Project.Controllers.ApiControllers
     {
         private IGuestRepository iGuestRepository;
         private IUnitOfWork iUnitOfWork;
-        public GuestController(IGuestRepository iGuestRepository, IUnitOfWork iUnitOfWork)
+        private HtmlEncoder htmlEncoder;
+        public GuestController(IGuestRepository iGuestRepository, IUnitOfWork iUnitOfWork, HtmlEncoder htmlEncoder)
         {
             this.iGuestRepository = iGuestRepository;
             this.iUnitOfWork = iUnitOfWork;
+            this.htmlEncoder = htmlEncoder;
         }
         // GET: api/<GuestController>
         [HttpGet]
         public List<Guest> GetGuests()
         {
             List<Guest> guests = iGuestRepository.GetGuests();
+            guests.ForEach(x => {
+                string encodedGuestName = htmlEncoder.Encode(x.Name);
+                x.Name = encodedGuestName;
+            });
             return guests;
         }
 

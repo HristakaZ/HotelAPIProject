@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using DataAccess.Repositories;
 using DataStructure;
@@ -15,16 +16,23 @@ namespace Hotel_API_Project.Controllers.ApiControllers
     {
         private IRoomRepository iRoomRepository;
         private IUnitOfWork iUnitOfWork;
-        public RoomController(IRoomRepository iRoomRepository, IUnitOfWork iUnitOfWork)
+        private HtmlEncoder htmlEncoder;
+        public RoomController(IRoomRepository iRoomRepository, IUnitOfWork iUnitOfWork, HtmlEncoder htmlEncoder)
         {
             this.iRoomRepository = iRoomRepository;
             this.iUnitOfWork = iUnitOfWork;
+            this.htmlEncoder = htmlEncoder;
         }
         // GET: api/<RoomController>
         [HttpGet]
         public List<Room> GetRooms()
         {
             List<Room> rooms = iRoomRepository.GetRooms();
+            /*TO DO: encode the rooms as well when you're done with the dropdown lists(for now encode the models where you have an
+              input type text(strings))*/
+            /*rooms.ForEach(x => {
+                 
+            });*/
             return rooms;
         }
 

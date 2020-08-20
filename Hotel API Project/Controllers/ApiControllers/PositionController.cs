@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using DataAccess.Repositories;
 using DataStructure;
@@ -15,16 +16,23 @@ namespace Hotel_API_Project.Controllers.ApiControllers
     {
         private IPositionRepository iPositionRepository;
         private IUnitOfWork iUnitOfWork;
-        public PositionController(IPositionRepository iPositionRepository, IUnitOfWork iUnitOfWork)
+        private HtmlEncoder htmlEncoder;
+        public PositionController(IPositionRepository iPositionRepository, IUnitOfWork iUnitOfWork, HtmlEncoder htmlEncoder)
         {
             this.iPositionRepository = iPositionRepository;
             this.iUnitOfWork = iUnitOfWork;
+            this.htmlEncoder = htmlEncoder;
         }
         // GET: api/<PositionController>
         [HttpGet]
-        public List<PositionApplicationRole> GetGuests()
+        public List<PositionApplicationRole> GetPositions()
         {
             List<PositionApplicationRole> positions = iPositionRepository.GetPositions();
+            /*note: this can be extended to a greater extent(encode other properties besides the position name)*/
+            positions.ForEach(x => {
+                string encodedPositionName = htmlEncoder.Encode(x.Name);
+                x.Name = encodedPositionName;
+            });
             return positions;
         }
 

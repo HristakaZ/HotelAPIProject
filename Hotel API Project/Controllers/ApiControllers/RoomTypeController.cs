@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using DataAccess.Repositories;
 using DataStructure;
@@ -15,16 +16,23 @@ namespace Hotel_API_Project.Controllers.ApiControllers
     {
         private IRoomTypeRepository iRoomTypeRepository;
         private IUnitOfWork iUnitOfWork;
-        public RoomTypeController(IRoomTypeRepository iRoomTypeRepository, IUnitOfWork iUnitOfWork)
+        private HtmlEncoder htmlEncoder;
+        public RoomTypeController(IRoomTypeRepository iRoomTypeRepository, IUnitOfWork iUnitOfWork, HtmlEncoder htmlEncoder)
         {
             this.iRoomTypeRepository = iRoomTypeRepository;
             this.iUnitOfWork = iUnitOfWork;
+            this.htmlEncoder = htmlEncoder;
         }
         // GET: api/<RoomTypeController>
         [HttpGet]
         public List<RoomType> GetRoomTypes()
         {
             List<RoomType> roomTypes = iRoomTypeRepository.GetRoomTypes();
+            /*note: this can be extended to a greater extent(encode other properties besides the roomtype name)*/
+            roomTypes.ForEach(x => {
+                string encodedRoomTypeName = htmlEncoder.Encode(x.Name);
+                x.Name = encodedRoomTypeName;
+            });
             return roomTypes;
         }
 
