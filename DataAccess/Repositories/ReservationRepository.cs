@@ -37,6 +37,10 @@ namespace DataAccess.Repositories
             {
                 // this code might be extended later, for more property updates
                 reservationToUpdate.StartDate = reservation.StartDate;
+                reservationToUpdate.EndDate = reservation.EndDate;
+                reservationToUpdate.Guest = reservation.Guest;
+                reservationToUpdate.Employee = reservation.Employee;
+                reservationToUpdate.RoomReservations = reservation.RoomReservations;
                 dbContext.Reservations.Update(reservationToUpdate);
             }
         }

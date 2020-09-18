@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using DataAccess.Repositories;
 using DataStructure;
+using Hotel_API_Project.Mappers;
 
 namespace Hotel_API_Project
 {
@@ -36,11 +37,17 @@ namespace Hotel_API_Project
                     Configuration.GetConnectionString("MyConnectionString")));
 
             services.AddDefaultIdentity<EmployeeApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultUI();
 
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
 
             services.AddRazorPages();
+
+            //ignoring endless reference loops when obtaining a relationship from one entity to another
+            services.AddControllersWithViews()
+                .AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+            );
 
             services.AddScoped<IEmployeeRepository, EmployeeRepository>();
             services.AddScoped<IGuestRepository, GuestRepository>();
@@ -49,6 +56,7 @@ namespace Hotel_API_Project
             services.AddScoped<IPositionRepository, PositionRepository>();
             services.AddScoped<IRoomTypeRepository, RoomTypeRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IReservationMapper, ReservationMapper>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

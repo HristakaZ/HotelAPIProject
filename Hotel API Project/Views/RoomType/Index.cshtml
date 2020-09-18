@@ -12,6 +12,12 @@
         $(document).ready(function () {
             let url = 'https://localhost:44357/api/RoomType';
             let ulRoomTypes = $('#ulRoomTypes');
+            let linkForCreate = $('<a>');
+            linkForCreate.attr('href', 'https://localhost:44357/RoomType/Create');
+            linkForCreate.text('Create RoomType');
+            ulRoomTypes.append(linkForCreate);
+            ulRoomTypes.append('</br>');
+            ulRoomTypes.append('</br>');
             $.ajax({
                 type: 'GET',
                 url: url,

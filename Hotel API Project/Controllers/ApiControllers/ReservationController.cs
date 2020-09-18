@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using DataAccess.Repositories;
 using DataStructure;
+using Hotel_API_Project.Mappers;
+using Hotel_API_Project.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,24 +18,38 @@ namespace Hotel_API_Project.Controllers.ApiControllers
     public class ReservationController : ControllerBase
     {
         private IReservationRepository iReservationRepository;
+        private IGuestRepository iGuestRepository;
+        private IEmployeeRepository iEmployeeRepository;
+        private IRoomRepository iRoomRepository;
         private IUnitOfWork iUnitOfWork;
         private HtmlEncoder htmlEncoder;
-        public ReservationController(IReservationRepository iReservationRepository, IUnitOfWork iUnitOfWork, HtmlEncoder htmlEncoder)
+        private IReservationMapper iReservationMapper;
+        public ReservationController(IReservationRepository iReservationRepository, IGuestRepository iGuestRepository,
+            IRoomRepository iRoomRepository, IEmployeeRepository iEmployeeRepository, IUnitOfWork iUnitOfWork, HtmlEncoder htmlEncoder,
+            IReservationMapper iReservationMapper)
         {
             this.iReservationRepository = iReservationRepository;
+            this.iGuestRepository = iGuestRepository;
+            this.iEmployeeRepository = iEmployeeRepository;
+            this.iRoomRepository = iRoomRepository;
             this.iUnitOfWork = iUnitOfWork;
             this.htmlEncoder = htmlEncoder;
+            this.iReservationMapper = iReservationMapper;
         }
         // GET: api/<ReservationController>
         [HttpGet]
-        public List<Reservation> GetGuests()
+        public List<Reservation> GetReservations()
         {
             List<Reservation> reservations = iReservationRepository.GetReservations();
             /*TO DO: encode the reservations as well when you're done with the dropdown lists(for now encode the models where you have an
               input type text(strings))*/
-            /*reservations.ForEach(x => {
-                
-            });*/
+            reservations.ForEach(x =>
+            {
+                string encodedReservationGuest = htmlEncoder.Encode(x.Guest.Name);
+                string encodedReservationEmployee = htmlEncoder.Encode(x.Employee.UserName);
+                x.Guest.Name = encodedReservationGuest;
+                x.Employee.UserName = encodedReservationEmployee;
+            });
             return reservations;
         }
 
@@ -53,10 +70,21 @@ namespace Hotel_API_Project.Controllers.ApiControllers
 
         // POST api/<ReservationController>
         [HttpPost]
-        public IActionResult Post([FromBody] Reservation reservation)
+        public IActionResult Post([FromBody] ReservationViewModel reservationViewModel)
         {
             try
             {
+                Guest guestFromDropDownList = iGuestRepository.GetGuestByID(reservationViewModel.Guest.ID);
+                reservationViewModel.Guest = guestFromDropDownList;
+                EmployeeApplicationUser employeeFromDropDownList = iEmployeeRepository.GetEmployeeByID(reservationViewModel.Employee.Id);
+                reservationViewModel.Employee = employeeFromDropDownList;
+                Reservation reservation = new Reservation();
+                reservation = iReservationMapper.MapReservationViewModelToModel(reservationViewModel, reservation);
+                reservation.RoomReservations = new List<RoomReservation>();
+                reservationViewModel.RoomReservation.Room = iRoomRepository.GetRoomByID
+                    (reservationViewModel.RoomReservation.RoomID);
+                reservationViewModel.RoomReservation.Reservation = reservation;
+                reservation.RoomReservations.Add(reservationViewModel.RoomReservation);
                 iReservationRepository.CreateReservation(reservation);
                 Uri uri = new Uri(Url.Link("GetReservationByID", new { Id = reservation.ID }));
                 iUnitOfWork.Save();
@@ -70,11 +98,23 @@ namespace Hotel_API_Project.Controllers.ApiControllers
 
         // PUT api/<ReservationController>/5
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Reservation reservation)
+        public IActionResult Put(int id, [FromBody] ReservationViewModel reservationViewModel)
         {
-            if (reservation != null)
+            if (reservationViewModel != null)
             {
-                reservation.ID = id;
+                Guest guestFromDropDownList = iGuestRepository.GetGuestByID(reservationViewModel.Guest.ID);
+                reservationViewModel.Guest = guestFromDropDownList;
+                EmployeeApplicationUser employeeFromDropDownList = iEmployeeRepository.GetEmployeeByID(reservationViewModel.Employee.Id);
+                reservationViewModel.Employee = employeeFromDropDownList;
+                reservationViewModel.ID = id;
+                Reservation reservation = iReservationRepository.GetReservationByID(reservationViewModel.ID);
+                reservationViewModel.RoomReservation.Room = iRoomRepository.GetRoomByID(reservationViewModel.RoomReservation.RoomID);
+                reservationViewModel.RoomReservation.Reservation = reservation;
+                reservationViewModel.RoomReservation.ReservationID = reservationViewModel.RoomReservation.Reservation.ID;
+                List<RoomReservation> roomReservations = reservation.RoomReservations.Where(x => x.ReservationID == reservationViewModel.ID).ToList();
+                reservation = iReservationMapper.MapReservationViewModelToModel(reservationViewModel, reservation);
+                reservation.RoomReservations = new List<RoomReservation>();
+                reservation.RoomReservations.Add(reservationViewModel.RoomReservation);
                 iReservationRepository.UpdateReservation(reservation);
                 iUnitOfWork.Save();
                 return Ok(reservation);

@@ -16,11 +16,14 @@ namespace Hotel_API_Project.Controllers.ApiControllers
     public class EmployeeController : ControllerBase
     {
         private IEmployeeRepository iEmployeeRepository;
+        private IPositionRepository iPositionRepository;
         private IUnitOfWork iUnitOfWork;
         private HtmlEncoder htmlEncoder;
-        public EmployeeController(IEmployeeRepository iEmployeeRepository, IUnitOfWork iUnitOfWork, HtmlEncoder htmlEncoder)
+        public EmployeeController(IEmployeeRepository iEmployeeRepository, IPositionRepository iPositionRepository, 
+            IUnitOfWork iUnitOfWork, HtmlEncoder htmlEncoder)
         {
             this.iEmployeeRepository = iEmployeeRepository;
+            this.iPositionRepository = iPositionRepository;
             this.iUnitOfWork = iUnitOfWork;
             this.htmlEncoder = htmlEncoder;
         }
@@ -30,10 +33,12 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         {
             List<EmployeeApplicationUser> employees = iEmployeeRepository.GetEmployees();
             /*encoding(against xss) each username at the get request, so as to store the entity column in its plain form in the database
-             note: this can be extended to a greater extent(encode other properties besides the username)*/
+             note: this can be extended to a greater extent(encode other properties besides the username), TO DO: handle the nullreference exception when the string is null*/
             employees.ForEach(x => {
                 string encodedEmployeeUserName = htmlEncoder.Encode(x.UserName);
+                string encodedEmployeePosition = htmlEncoder.Encode(x.Position.Name);
                 x.UserName = encodedEmployeeUserName;
+                x.Position.Name = encodedEmployeePosition;
             });
             return employees;
         }
@@ -59,6 +64,10 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         {
             try
             {
+                //TO DO for later on: move the create logic for the employee position into a service 
+                List<PositionApplicationRole> positions = iPositionRepository.GetPositions();
+                PositionApplicationRole employeePositionFromDropDownList = positions.Where(x => x.Id == employee.Position.Id).FirstOrDefault();
+                employee.Position = employeePositionFromDropDownList;
                 iEmployeeRepository.CreateEmployee(employee);
                 Uri uri = new Uri(Url.Link("GetEmployeeByID", new { Id = employee.Id }));
                 iUnitOfWork.Save();
@@ -77,6 +86,10 @@ namespace Hotel_API_Project.Controllers.ApiControllers
             if (employee != null)
             {
                 employee.Id = id;
+                //TO DO for later on: move the update logic for the employee position into a service
+                List<PositionApplicationRole> positions = iPositionRepository.GetPositions();
+                PositionApplicationRole employeePositionFromDropDownList = positions.Where(x => x.Id == employee.Position.Id).FirstOrDefault();
+                employee.Position = employeePositionFromDropDownList;
                 iEmployeeRepository.UpdateEmployee(employee);
                 iUnitOfWork.Save();
                 return Ok(employee);

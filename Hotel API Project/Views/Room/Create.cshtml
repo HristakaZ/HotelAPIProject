@@ -16,8 +16,13 @@
             let btnRoomCreate = $('#btnRoomCreate');
             btnRoomCreate.click(function () {
                 let roomNumber = parseInt($('#roomNumber').val());
+                let roomTypeDropDownList = $('#roomTypeDropDownList');
+                let roomType = {
+                    id: Number(roomTypeDropDownList.val())
+                };
                 let room = {
-                    number: roomNumber
+                    number: roomNumber,
+                    roomType: roomType
                     /* more info to be added here */
                 };
                 $.ajax({
@@ -38,16 +43,41 @@
 
         });
     }
+    function getRoomTypes() {
+        let urlForRoomType = 'https://localhost:44357/api/RoomType';
+        $.ajax({
+            type: 'GET',
+            url: urlForRoomType,
+            contentType: 'application/json',
+            success: function (data) {
+                let roomTypeDropDownList = $('#roomTypeDropDownList');
+                $.each(data, function (index, val) {
+                    let optionForRoomTypeDropDownList = $('<option>');
+                    optionForRoomTypeDropDownList.attr('value', val.id);
+                    optionForRoomTypeDropDownList.append(val.name);
+                    optionForRoomTypeDropDownList.append('</option>');
+                    roomTypeDropDownList.append(optionForRoomTypeDropDownList);
+                });
+            }
+
+        });
+    }
 </script>
 
 <script>
+    getRoomTypes();
     createRoom();
 </script>
 
 <div style="margin-bottom: 15px">
     <input type="text" name="roomNumber" placeholder="Room Number" id="roomNumber" />
-    @*TO DO: CHANGE THE INPUT TYPE TEXTS WITH HTML HELPERS IN ORDER TO AVOID XSS ATTACK! <br />
-        @Html.TextBox("", null, new { name= "Employee Name", placeholder = "Employee Name", id = "empName"})*@
+    
+</div>
+
+<div style="margin-bottom: 15px">
+    <select id="roomTypeDropDownList" name="roomTypeDropDownList">
+        <option>Enter The RoomType</option>
+    </select>
 </div>
 
 <div style="margin-bottom: 15px">

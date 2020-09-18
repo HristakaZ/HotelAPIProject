@@ -12,6 +12,12 @@
         $(document).ready(function () {
             let url = 'https://localhost:44357/api/Guest';
             let ulGuests = $('#ulGuests');
+            let linkForCreate = $('<a>');
+            linkForCreate.attr('href', 'https://localhost:44357/Guest/Create');
+            linkForCreate.text('Create Guest');
+            ulGuests.append(linkForCreate);
+            ulGuests.append('</br>');
+            ulGuests.append('</br>');
             $.ajax({
                 type: 'GET',
                 url: url,
@@ -19,7 +25,6 @@
                 accepts: 'json',
                 success: function (data) {
                     $.each(data, function (index, val) {
-                        /* TO DO: MAKE THE DELETE PAGE*/
                         let linkForUpdate = $('<a>');
                         linkForUpdate.attr('href', 'https://localhost:44357/Guest/Update/' + val.id);
                         linkForUpdate.text('Update Guest');
@@ -30,8 +35,7 @@
                         ulGuests.append('</br>');
                         ulGuests.append(linkForDelete);
                         ulGuests.append('</br>');
-                        ulGuests.append('Guest ID: ' + val.id + '</br>' + 'Guest Name: ' + val.name +
-                            '</br>' + 'Guest Reservations:' + ' ' + val.reservations + '</br>' + '</br>');
+                        ulGuests.append('Guest ID: ' + val.id + '</br>' + 'Guest Name: ' + val.name + '</br>');
                     })
                 }
             });

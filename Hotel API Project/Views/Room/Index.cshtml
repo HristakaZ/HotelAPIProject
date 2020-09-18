@@ -12,6 +12,12 @@
         $(document).ready(function () {
             let url = 'https://localhost:44357/api/Room';
             let ulRooms = $('#ulRooms');
+            let linkForCreate = $('<a>');
+            linkForCreate.attr('href', 'https://localhost:44357/Room/Create');
+            linkForCreate.text('Create Room');
+            ulRooms.append(linkForCreate);
+            ulRooms.append('</br>');
+            ulRooms.append('</br>');
             $.ajax({
                 type: 'GET',
                 url: url,
@@ -31,7 +37,8 @@
                         ulRooms.append('</br>');
                         ulRooms.append(linkForDelete);
                         ulRooms.append('</br>');
-                        ulRooms.append('Room ID: ' + val.id + '</br>' + 'Room Number: ' + val.number);
+                        ulRooms.append('Room ID: ' + val.id + '</br>' + 'Room Number: ' + val.number + '</br>' + 'Room Type: ' +
+                            val.roomType.name + '</br>');
                     })
                 }
             });

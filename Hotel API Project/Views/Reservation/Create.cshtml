@@ -15,8 +15,22 @@
             let url = 'https://localhost:44357/api/Reservation';
             let btnReservationCreate = $('#btnReservationCreate');
             btnReservationCreate.click(function () {
+                let guestDropDownList = $('#guestDropDownList');
+                let employeeDropDownList = $('#employeeDropDownList');
+                let roomDropDownList = $('#roomDropDownList');
+                let guest = {
+                    id: Number(guestDropDownList.val())
+                };
+                let employee = {
+                    id: Number(employeeDropDownList.val())
+                };
+                let roomReservation = {
+                    roomID: Number(roomDropDownList.val())
+                };
                 let reservation = {
-                    /* info to be added here */
+                    guest: guest,
+                    employee: employee,
+                    roomReservation: roomReservation
                 };
                 $.ajax({
                     url: url,
@@ -36,16 +50,95 @@
 
         });
     }
+
+    function getGuests() {
+        let urlForGuest = 'https://localhost:44357/api/Guest';
+        $.ajax({
+            type: 'GET',
+            url: urlForGuest,
+            contentType: 'application/json',
+            success: function (data) {
+                let guestDropDownList = $('#guestDropDownList');
+                $.each(data, function (index, val) {
+                    let optionForGuestDropDownList = $('<option>');
+                    optionForGuestDropDownList.attr('value', val.id);
+                    optionForGuestDropDownList.append(val.name);
+                    optionForGuestDropDownList.append('</option>');
+                    guestDropDownList.append(optionForGuestDropDownList);
+                });
+            }
+
+        });
+    }
+
+    function getEmployees() {
+        let urlForEmployee = 'https://localhost:44357/api/Employee';
+        $.ajax({
+            type: 'GET',
+            url: urlForEmployee,
+            contentType: 'application/json',
+            success: function (data) {
+                let employeeDropDownList = $('#employeeDropDownList');
+                $.each(data, function (index, val) {
+                    let optionForEmployeeDropDownList = $('<option>');
+                    optionForEmployeeDropDownList.attr('value', val.id);
+                    optionForEmployeeDropDownList.append(val.userName);
+                    optionForEmployeeDropDownList.append('</option>');
+                    employeeDropDownList.append(optionForEmployeeDropDownList);
+                });
+            }
+
+        });
+    }
+
+    function getRooms() {
+        let urlForRooms = 'https://localhost:44357/api/Room';
+        $.ajax({
+            type: 'GET',
+            url: urlForRooms,
+            contentType: 'application/json',
+            success: function (data) {
+                let roomDropDownList = $('#roomDropDownList');
+                $.each(data, function (index, val) {
+                    let optionForRoomDropDownList = $('<option>');
+                    optionForRoomDropDownList.attr('value', val.id);
+                    optionForRoomDropDownList.append(val.number);
+                    optionForRoomDropDownList.append('</option>');
+                    roomDropDownList.append(optionForRoomDropDownList);
+                });
+            }
+
+        });
+    }
 </script>
 
 <script>
+    getGuests();
+    getEmployees();
+    getRooms();
     createReservation();
 </script>
 
 <div style="margin-bottom: 15px">
     <input type="text" name="reservationDate" placeholder="Reservation Date" id="reservationDate" />
-    @*TO DO: CHANGE THE INPUT TYPE TEXTS WITH HTML HELPERS IN ORDER TO AVOID XSS ATTACK! <br />
-        @Html.TextBox("", null, new { name= "Employee Name", placeholder = "Employee Name", id = "empName"})*@
+</div>
+
+<div style="margin-bottom: 15px">
+    <select id="guestDropDownList" name="guestDropDownList">
+        <option>Enter The Guest</option>
+    </select>
+</div>
+
+<div style="margin-bottom: 15px">
+    <select id="employeeDropDownList" name="employeeDropDownList">
+        <option>Enter The Employee</option>
+    </select>
+</div>
+
+<div style="margin-bottom: 15px">
+    <select id="roomDropDownList" name="roomDropDownList">
+        <option>Enter The Room</option>
+    </select>
 </div>
 
 <div style="margin-bottom: 15px">

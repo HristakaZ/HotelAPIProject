@@ -19,6 +19,25 @@
         let hiddenInputID = $('#empID');
         hiddenInputID.attr('value', employeeID);
     }
+    function getEmployeePosition() {
+        let urlForEmployeePosition = 'https://localhost:44357/api/Position';
+        $.ajax({
+            type: 'GET',
+            url: urlForEmployeePosition,
+            contentType: 'application/json',
+            success: function (data) {
+                let positionDropDownList = $('#positionDropDownList');
+                $.each(data, function (index, val) {
+                    let optionForPositionDropDownList = $('<option>');
+                    optionForPositionDropDownList.attr('value', val.id);
+                    optionForPositionDropDownList.append(val.name);
+                    optionForPositionDropDownList.append('</option>');
+                    positionDropDownList.append(optionForPositionDropDownList);
+                });
+            }
+
+        });
+    }
     function updateEmployee() {
         $(document).ready(function () {
             getEmployeeIDThroughURL();
@@ -26,9 +45,13 @@
             btnEmployeeUpdate.click(function () {
                 let employeeID = parseInt($('#empID').val());
                 let employeeName = $('#empName').val();
+                let employeePosition = {
+                    id: $('#positionDropDownList').val()
+                };
                 let employee = {
                     id: employeeID,
-                    userName: employeeName
+                    userName: employeeName,
+                    position: employeePosition
                 };
                 let url = 'https://localhost:44357/api/Employee/' + employeeID;
                 $.ajax({
@@ -51,6 +74,8 @@
 </script>
 
 <script type="text/javascript">
+    getEmployeeIDThroughURL();
+    getEmployeePosition();
     updateEmployee();
 </script>
 
@@ -61,8 +86,12 @@
 
 <div style="margin-bottom: 15px">
     <input type="text" name="Employee Name" placeholder="Employee Name" id="empName" />
-    @*TO DO: CHANGE THE INPUT TYPE TEXTS WITH HTML HELPERS IN ORDER TO AVOID XSS ATTACK! <br />
-    @Html.TextBox("", null, new { name = "Employee Name", placeholder = "Employee Name", id = "empName" })*@
+</div>
+
+<div style="margin-bottom: 15px">
+    <select id="positionDropDownList" name="positionDropDownList">
+        <option>Enter The Employee Position</option>
+    </select>
 </div>
 
 <div style="margin-bottom: 15px">

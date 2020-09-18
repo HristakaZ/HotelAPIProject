@@ -51,6 +51,7 @@
 </script>
 
 <script type="text/javascript">
+    getPositionIDThroughURL();
     updatePosition();
 </script>
 
@@ -61,8 +62,6 @@
 
 <div style="margin-bottom: 15px">
     <input type="text" name="Position Name" placeholder="Position Name" id="positionName" />
-    @*TO DO: CHANGE THE INPUT TYPE TEXTS WITH HTML HELPERS IN ORDER TO AVOID XSS ATTACK! <br />
-        @Html.TextBox("", null, new { name = "Employee Name", placeholder = "Employee Name", id = "empName" })*@
 </div>
 
 <div style="margin-bottom: 15px">

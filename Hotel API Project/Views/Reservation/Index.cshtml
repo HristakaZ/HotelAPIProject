@@ -6,12 +6,18 @@
 
 <h1>Reservations</h1>
 <script src="~/lib/jquery/dist/jquery.js"></script>
-<!--TO DO: make the needed API calls to obtain the info-->
+
 <script type="text/javascript">
     function getReservations() {
         $(document).ready(function () {
             let url = 'https://localhost:44357/api/Reservation';
             let ulReservations = $('#ulReservations');
+            let linkForCreate = $('<a>');
+            linkForCreate.attr('href', 'https://localhost:44357/Reservation/Create');
+            linkForCreate.text('Create Reservation');
+            ulReservations.append(linkForCreate);
+            ulReservations.append('</br>');
+            ulReservations.append('</br>');
             $.ajax({
                 type: 'GET',
                 url: url,
@@ -19,7 +25,6 @@
                 accepts: 'json',
                 success: function (data) {
                     $.each(data, function (index, val) {
-                        /* TO DO: MAKE THE DELETE PAGE*/
                         let linkForUpdate = $('<a>');
                         linkForUpdate.attr('href', 'https://localhost:44357/Reservation/Update/' + val.id);
                         linkForUpdate.text('Update Reservation');
@@ -30,7 +35,16 @@
                         ulReservations.append('</br>');
                         ulReservations.append(linkForDelete);
                         ulReservations.append('</br>');
-                        ulReservations.append('Reservation ID: ' + val.id + '</br>');
+                        ulReservations.append('Reservation ID: ' + val.id + '</br>' + 'The Reservation is for the Guest: ' + val.guest.name + '</br>' +
+                            'The Guest was serviced by Employee: ' + val.employee.userName + '</br>' + 'Reservation Start Date: ' + val.startDate +
+                            '</br>' + 'Reservation End Date: ' + val.endDate + '</br>' + 'The Rooms for the Reservation are: ');
+                        let roomReservations = val.roomReservations;
+                        for (var i = 0; i < roomReservations.length; i++) {
+                            console.log(roomReservations[i].room.number);
+                            ulReservations.append(roomReservations[i].room.number);
+                            ulReservations.append('; ');
+                        }
+                        ulReservations.append('</br>');
                     })
                 }
             });

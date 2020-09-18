@@ -38,6 +38,7 @@ namespace DataAccess.Repositories
             {
                 // this code might be extended later, for more property updates
                 employeeToUpdate.UserName = employee.UserName;
+                employeeToUpdate.Position = employee.Position;
                 dbContext.Employees.Update(employeeToUpdate);
             }
         }

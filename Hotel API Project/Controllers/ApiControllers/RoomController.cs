@@ -15,11 +15,14 @@ namespace Hotel_API_Project.Controllers.ApiControllers
     public class RoomController : ControllerBase
     {
         private IRoomRepository iRoomRepository;
+        private IRoomTypeRepository iRoomTypeRepository;
         private IUnitOfWork iUnitOfWork;
         private HtmlEncoder htmlEncoder;
-        public RoomController(IRoomRepository iRoomRepository, IUnitOfWork iUnitOfWork, HtmlEncoder htmlEncoder)
+        public RoomController(IRoomRepository iRoomRepository, IRoomTypeRepository iRoomTypeRepository,
+            IUnitOfWork iUnitOfWork, HtmlEncoder htmlEncoder)
         {
             this.iRoomRepository = iRoomRepository;
+            this.iRoomTypeRepository = iRoomTypeRepository;
             this.iUnitOfWork = iUnitOfWork;
             this.htmlEncoder = htmlEncoder;
         }
@@ -30,9 +33,10 @@ namespace Hotel_API_Project.Controllers.ApiControllers
             List<Room> rooms = iRoomRepository.GetRooms();
             /*TO DO: encode the rooms as well when you're done with the dropdown lists(for now encode the models where you have an
               input type text(strings))*/
-            /*rooms.ForEach(x => {
-                 
-            });*/
+            rooms.ForEach(x => {
+                string encodedRoomRoomType = htmlEncoder.Encode(x.RoomType.Name);
+                x.RoomType.Name = encodedRoomRoomType;
+            });
             return rooms;
         }
 
@@ -57,6 +61,9 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         {
             try
             {
+                //TO DO for later on: move the create logic for the room roomtype in a service
+                RoomType roomTypeFromDropDownList = iRoomTypeRepository.GetRoomTypeByID(room.RoomType.ID);
+                room.RoomType = roomTypeFromDropDownList;
                 iRoomRepository.CreateRoom(room);
                 Uri uri = new Uri(Url.Link("GetRoomByID", new { Id = room.ID }));
                 iUnitOfWork.Save();
@@ -74,7 +81,11 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         {
             if (room != null)
             {
+                //TO DO for later on: move the update logic for the room roomtype in a service
                 room.ID = id;
+                List<RoomType> roomTypes = iRoomTypeRepository.GetRoomTypes();
+                RoomType roomTypeFromDropDownList = roomTypes.Where(x => x.ID == room.RoomType.ID).FirstOrDefault();
+                room.RoomType = roomTypeFromDropDownList;
                 iRoomRepository.UpdateRoom(room);
                 iUnitOfWork.Save();
                 return Ok(room);

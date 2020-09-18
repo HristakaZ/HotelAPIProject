@@ -52,6 +52,7 @@
 </script>
 
 <script type="text/javascript">
+    getRoomTypeIDThroughURL();
     updateRoomType();
 </script>
 
@@ -62,8 +63,6 @@
 
 <div style="margin-bottom: 15px">
     <input type="text" name="roomTypeName" placeholder="RoomType Name" id="roomTypeName" />
-    @*TO DO: CHANGE THE INPUT TYPE TEXTS WITH HTML HELPERS IN ORDER TO AVOID XSS ATTACK! <br />
-        @Html.TextBox("", null, new { name = "Employee Name", placeholder = "Employee Name", id = "empName" })*@
 </div>
 
 <div style="margin-bottom: 15px">
