@@ -35,17 +35,18 @@
                         ulReservations.append('</br>');
                         ulReservations.append(linkForDelete);
                         ulReservations.append('</br>');
-                        ulReservations.append('Reservation ID: ' + val.id + '</br>' + 'The Reservation is for the Guest: ' + val.guest.name + '</br>' +
-                            'The Guest was serviced by Employee: ' + val.employee.userName + '</br>' + 'Reservation Start Date: ' + val.startDate +
-                            '</br>' + 'Reservation End Date: ' + val.endDate + '</br>' + 'The Rooms for the Reservation are: ');
+                        ulReservations.append('Reservation ID: ' + val.id + '</br>' + 'Reservation Start Date: ' + val.startDate +
+                            '</br>' + 'Reservation End Date: ' + val.endDate + '</br>' + 'The Guest was serviced by Employee: '
+                            + val.employee.userName + '</br>' + 'The Reservation is for Guest: ' + val.guest.name + '</br>');
                         let roomReservations = val.roomReservations;
                         for (var i = 0; i < roomReservations.length; i++) {
                             console.log(roomReservations[i].room.number);
+                            ulReservations.append('The Reservation Room Number is: ');
                             ulReservations.append(roomReservations[i].room.number);
                             ulReservations.append('; ');
+                            ulReservations.append('</br>');
                         }
-                        ulReservations.append('</br>');
-                    })
+                    });
                 }
             });
 

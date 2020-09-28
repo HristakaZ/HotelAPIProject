@@ -41,14 +41,12 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         public List<Reservation> GetReservations()
         {
             List<Reservation> reservations = iReservationRepository.GetReservations();
-            /*TO DO: encode the reservations as well when you're done with the dropdown lists(for now encode the models where you have an
-              input type text(strings))*/
             reservations.ForEach(x =>
             {
-                string encodedReservationGuest = htmlEncoder.Encode(x.Guest.Name);
-                string encodedReservationEmployee = htmlEncoder.Encode(x.Employee.UserName);
-                x.Guest.Name = encodedReservationGuest;
-                x.Employee.UserName = encodedReservationEmployee;
+                string encodedEmployeeName = htmlEncoder.Encode(x.Employee.UserName);
+                string encodedGuestName = htmlEncoder.Encode(x.Guest.Name);
+                x.Employee.UserName = encodedEmployeeName;
+                x.Guest.Name = encodedGuestName;
             });
             return reservations;
         }

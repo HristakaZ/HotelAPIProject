@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
@@ -13,6 +14,7 @@ namespace DataStructure
         public DateTime EndDate { get; set; }
         public virtual Guest Guest { get; set; }
         public virtual EmployeeApplicationUser Employee { get; set; }
+        /*[JsonIgnore]*/
         public virtual List<RoomReservation> RoomReservations { get; set; }
     }
 }
