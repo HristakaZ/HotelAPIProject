@@ -36,7 +36,12 @@ namespace Hotel_API_Project
                 options.UseSqlServer(
                     Configuration.GetConnectionString("MyConnectionString")));
 
-            services.AddDefaultIdentity<EmployeeApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            services.AddDefaultIdentity<EmployeeApplicationUser>(options =>
+            {
+                options.SignIn.RequireConfirmedAccount = false;
+                options.SignIn.RequireConfirmedEmail = false;
+                options.SignIn.RequireConfirmedPhoneNumber = false;
+            })
                 .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultUI();
 
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
