@@ -31,11 +31,17 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         public List<Room> GetRooms()
         {
             List<Room> rooms = iRoomRepository.GetRooms();
-            /*TO DO: encode the rooms as well when you're done with the dropdown lists(for now encode the models where you have an
-              input type text(strings))*/
-            rooms.ForEach(x => {
-                string encodedRoomRoomType = htmlEncoder.Encode(x.RoomType.Name);
-                x.RoomType.Name = encodedRoomRoomType;
+            /*encoding(against xss) at the get request, so as to store the entity column in its plain form in the database*/
+            rooms.ForEach(x =>
+            {
+                if (x != null)
+                {
+                    if (x.RoomType != null)
+                    {
+                        string encodedRoomRoomType = htmlEncoder.Encode(x.RoomType.Name);
+                        x.RoomType.Name = encodedRoomRoomType;
+                    }
+                }
             });
             return rooms;
         }

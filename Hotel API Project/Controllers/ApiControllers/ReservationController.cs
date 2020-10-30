@@ -41,12 +41,22 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         public List<Reservation> GetReservations()
         {
             List<Reservation> reservations = iReservationRepository.GetReservations();
+            /*encoding(against xss) at the get request, so as to store the entity column in its plain form in the database*/
             reservations.ForEach(x =>
             {
-                string encodedEmployeeName = htmlEncoder.Encode(x.Employee.UserName);
-                string encodedGuestName = htmlEncoder.Encode(x.Guest.Name);
-                x.Employee.UserName = encodedEmployeeName;
-                x.Guest.Name = encodedGuestName;
+                if (x != null)
+                {
+                    if (x.Employee != null)
+                    {
+                        string encodedEmployeeName = htmlEncoder.Encode(x.Employee.UserName);
+                        x.Employee.UserName = encodedEmployeeName;
+                    }
+                    else if (x.Guest != null)
+                    {
+                        string encodedGuestName = htmlEncoder.Encode(x.Guest.Name);
+                        x.Guest.Name = encodedGuestName;
+                    }
+                }
             });
             return reservations;
         }

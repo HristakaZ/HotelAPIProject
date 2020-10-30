@@ -19,7 +19,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         private IPositionRepository iPositionRepository;
         private IUnitOfWork iUnitOfWork;
         private HtmlEncoder htmlEncoder;
-        public EmployeeController(IEmployeeRepository iEmployeeRepository, IPositionRepository iPositionRepository, 
+        public EmployeeController(IEmployeeRepository iEmployeeRepository, IPositionRepository iPositionRepository,
             IUnitOfWork iUnitOfWork, HtmlEncoder htmlEncoder)
         {
             this.iEmployeeRepository = iEmployeeRepository;
@@ -32,13 +32,19 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         public List<EmployeeApplicationUser> GetEmployees()
         {
             List<EmployeeApplicationUser> employees = iEmployeeRepository.GetEmployees();
-            /*encoding(against xss) each username at the get request, so as to store the entity column in its plain form in the database
-             note: this can be extended to a greater extent(encode other properties besides the username), TO DO: handle the nullreference exception when the string is null*/
-            employees.ForEach(x => {
-                string encodedEmployeeUserName = htmlEncoder.Encode(x.UserName);
-                string encodedEmployeePosition = htmlEncoder.Encode(x.Position.Name);
-                x.UserName = encodedEmployeeUserName;
-                x.Position.Name = encodedEmployeePosition;
+            /*encoding(against xss) at the get request, so as to store the entity column in its plain form in the database*/
+            employees.ForEach(x =>
+            {
+                if (x != null)
+                {
+                    string encodedEmployeeUserName = htmlEncoder.Encode(x.UserName);
+                    x.UserName = encodedEmployeeUserName;
+                    if (x.Position != null)
+                    {
+                        string encodedEmployeePosition = htmlEncoder.Encode(x.Position.Name);
+                        x.Position.Name = encodedEmployeePosition;
+                    }
+                }
             });
             return employees;
         }

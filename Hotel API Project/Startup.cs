@@ -41,8 +41,7 @@ namespace Hotel_API_Project
                 options.SignIn.RequireConfirmedAccount = false;
                 options.SignIn.RequireConfirmedEmail = false;
                 options.SignIn.RequireConfirmedPhoneNumber = false;
-            })
-                .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultUI();
+            }).AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultUI();
 
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
 

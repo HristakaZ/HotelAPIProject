@@ -28,9 +28,13 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         public List<Guest> GetGuests()
         {
             List<Guest> guests = iGuestRepository.GetGuests();
+            /*encoding(against xss) at the get request, so as to store the entity column in its plain form in the database*/
             guests.ForEach(x => {
-                string encodedGuestName = htmlEncoder.Encode(x.Name);
-                x.Name = encodedGuestName;
+                if (x != null)
+                {
+                    string encodedGuestName = htmlEncoder.Encode(x.Name);
+                    x.Name = encodedGuestName;
+                }
             });
             return guests;
         }

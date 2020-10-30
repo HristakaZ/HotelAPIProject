@@ -28,10 +28,13 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         public List<RoomType> GetRoomTypes()
         {
             List<RoomType> roomTypes = iRoomTypeRepository.GetRoomTypes();
-            /*note: this can be extended to a greater extent(encode other properties besides the roomtype name)*/
+            /*encoding(against xss) at the get request, so as to store the entity column in its plain form in the database*/
             roomTypes.ForEach(x => {
-                string encodedRoomTypeName = htmlEncoder.Encode(x.Name);
-                x.Name = encodedRoomTypeName;
+                if (x != null)
+                {
+                    string encodedRoomTypeName = htmlEncoder.Encode(x.Name);
+                    x.Name = encodedRoomTypeName;
+                }
             });
             return roomTypes;
         }

@@ -28,10 +28,13 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         public List<PositionApplicationRole> GetPositions()
         {
             List<PositionApplicationRole> positions = iPositionRepository.GetPositions();
-            /*note: this can be extended to a greater extent(encode other properties besides the position name)*/
+            /*encoding(against xss) at the get request, so as to store the entity column in its plain form in the database*/
             positions.ForEach(x => {
-                string encodedPositionName = htmlEncoder.Encode(x.Name);
-                x.Name = encodedPositionName;
+                if (x != null)
+                {
+                    string encodedPositionName = htmlEncoder.Encode(x.Name);
+                    x.Name = encodedPositionName;
+                }
             });
             return positions;
         }
