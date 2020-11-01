@@ -12,6 +12,9 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using DataAccess.Repositories;
+using Hotel_API_Project.Data;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Hotel_API_Project.Areas.Identity.Pages.Account
 {
@@ -21,14 +24,16 @@ namespace Hotel_API_Project.Areas.Identity.Pages.Account
         private readonly UserManager<EmployeeApplicationUser> _userManager;
         private readonly SignInManager<EmployeeApplicationUser> _signInManager;
         private readonly ILogger<EmployeeApplicationUser> _logger;
-
+        private IEmployeeRepository iEmployeeRepository;
         public LoginModel(SignInManager<EmployeeApplicationUser> signInManager, 
             ILogger<EmployeeApplicationUser> logger,
-            UserManager<EmployeeApplicationUser> userManager)
+            UserManager<EmployeeApplicationUser> userManager,
+            IEmployeeRepository iEmployeeRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            this.iEmployeeRepository = iEmployeeRepository;
         }
 
         [BindProperty]

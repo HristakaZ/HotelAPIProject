@@ -15,6 +15,9 @@ using Microsoft.Extensions.Hosting;
 using DataAccess.Repositories;
 using DataStructure;
 using Hotel_API_Project.Mappers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace Hotel_API_Project
 {
@@ -43,15 +46,31 @@ namespace Hotel_API_Project
                 options.SignIn.RequireConfirmedPhoneNumber = false;
             }).AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultUI();
 
-            services.AddControllersWithViews().AddRazorRuntimeCompilation();
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;//the UseAuthentication() middleware in the Configure method will use this scheme(Bearer Scheme)
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme; //the [Authorize] attribute will use this scheme(Bearer scheme)
+            })
+            .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = "http://localhost:5000",
+                        ValidAudience = "http://localhost:5000",
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKey@345"))
+                    };
+                });
+
+            services.AddControllersWithViews().AddRazorRuntimeCompilation()
+                //ignoring endless reference loops when obtaining a relationship from one entity to another
+                .AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
             services.AddRazorPages();
-
-            //ignoring endless reference loops when obtaining a relationship from one entity to another
-            services.AddControllersWithViews()
-                .AddNewtonsoftJson(options =>
-                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-            );
 
             services.AddScoped<IEmployeeRepository, EmployeeRepository>();
             services.AddScoped<IGuestRepository, GuestRepository>();
@@ -65,7 +84,7 @@ namespace Hotel_API_Project
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
+        { 
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DataAccess.Repositories;
 using DataStructure;
 using Hotel_API_Project.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,7 +29,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
             this.htmlEncoder = htmlEncoder;
         }
         // GET: api/<EmployeeController>
-        [HttpGet]
+        [HttpGet, Authorize]
         public List<EmployeeApplicationUser> GetEmployees()
         {
             List<EmployeeApplicationUser> employees = iEmployeeRepository.GetEmployees();
