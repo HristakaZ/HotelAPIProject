@@ -29,10 +29,11 @@ namespace Hotel_API_Project.Controllers.ApiControllers
             this.htmlEncoder = htmlEncoder;
         }
         // GET: api/<EmployeeController>
-        [HttpGet, Authorize]
+        [HttpGet/*, Authorize(Roles = "No Position!")*/]
         public List<EmployeeApplicationUser> GetEmployees()
         {
             List<EmployeeApplicationUser> employees = iEmployeeRepository.GetEmployees();
+            List<PositionApplicationRole> positions = iPositionRepository.GetPositions();
             /*encoding(against xss) at the get request, so as to store the entity column in its plain form in the database*/
             employees.ForEach(x =>
             {
@@ -44,6 +45,10 @@ namespace Hotel_API_Project.Controllers.ApiControllers
                     {
                         string encodedEmployeePosition = htmlEncoder.Encode(x.Position.Name);
                         x.Position.Name = encodedEmployeePosition;
+                    }
+                    if (x.Position == null)
+                    {
+                        x.Position = positions.Where(x => x.Name == "No Position!").FirstOrDefault();
                     }
                 }
             });
@@ -75,6 +80,10 @@ namespace Hotel_API_Project.Controllers.ApiControllers
                 List<PositionApplicationRole> positions = iPositionRepository.GetPositions();
                 PositionApplicationRole employeePositionFromDropDownList = positions.Where(x => x.Id == employee.Position.Id).FirstOrDefault();
                 employee.Position = employeePositionFromDropDownList;
+                if (employee.Position == null)
+                {
+                    employee.Position = positions.Where(x => x.Name == "No Position!").FirstOrDefault();
+                }
                 iEmployeeRepository.CreateEmployee(employee);
                 Uri uri = new Uri(Url.Link("GetEmployeeByID", new { Id = employee.Id }));
                 iUnitOfWork.Save();

@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using DataAccess.Repositories;
 
 namespace Hotel_API_Project.Areas.Identity.Pages.Account
 {
@@ -24,17 +25,19 @@ namespace Hotel_API_Project.Areas.Identity.Pages.Account
         private readonly UserManager<EmployeeApplicationUser> _userManager;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
-
+        private IPositionRepository iPositionRepository; 
         public RegisterModel(
             UserManager<EmployeeApplicationUser> userManager,
             SignInManager<EmployeeApplicationUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IPositionRepository iPositionRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            this.iPositionRepository = iPositionRepository;
         }
 
         [BindProperty]
@@ -68,9 +71,11 @@ namespace Hotel_API_Project.Areas.Identity.Pages.Account
         {
             returnUrl = returnUrl ?? Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            List<PositionApplicationRole> positions = iPositionRepository.GetPositions();
             if (ModelState.IsValid)
             {
-                var user = new EmployeeApplicationUser { UserName = Input.UserName, Email = Input.Email };
+                var user = new EmployeeApplicationUser { UserName = Input.UserName, Email = Input.Email, 
+                    Position = positions.Where(x => x.Name == "No Position!").FirstOrDefault()};
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {

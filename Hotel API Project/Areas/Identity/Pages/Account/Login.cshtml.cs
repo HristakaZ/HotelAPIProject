@@ -15,6 +15,11 @@ using Microsoft.Extensions.Logging;
 using DataAccess.Repositories;
 using Hotel_API_Project.Data;
 using System.Security.Cryptography.X509Certificates;
+using System.Net.Http;
+using Newtonsoft.Json;
+using System.Text;
+using Microsoft.AspNetCore.Http;
+using Hotel_API_Project.DTOs;
 
 namespace Hotel_API_Project.Areas.Identity.Pages.Account
 {
@@ -25,7 +30,7 @@ namespace Hotel_API_Project.Areas.Identity.Pages.Account
         private readonly SignInManager<EmployeeApplicationUser> _signInManager;
         private readonly ILogger<EmployeeApplicationUser> _logger;
         private IEmployeeRepository iEmployeeRepository;
-        public LoginModel(SignInManager<EmployeeApplicationUser> signInManager, 
+        public LoginModel(SignInManager<EmployeeApplicationUser> signInManager,
             ILogger<EmployeeApplicationUser> logger,
             UserManager<EmployeeApplicationUser> userManager,
             IEmployeeRepository iEmployeeRepository)
@@ -50,7 +55,7 @@ namespace Hotel_API_Project.Areas.Identity.Pages.Account
         {
             [Required]
             [DataType(DataType.Password)]
-            public string Password { get; set; }
+            public string NormalPassword { get; set; }
 
             [Display(Name = "Remember me?")]
             public bool RememberMe { get; set; }
@@ -81,20 +86,25 @@ namespace Hotel_API_Project.Areas.Identity.Pages.Account
             {
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(Input.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
-                if (result.Succeeded)
+                /*var result = await _signInManager.PasswordSignInAsync(Input.UserName, Input.NormalPassword, Input.RememberMe, lockoutOnFailure: false);*/
+                HttpClient httpClient = new HttpClient();
+                InputModel inputModelEmployee = new InputModel()
+                {
+                    UserName = Input.UserName,
+                    NormalPassword = Input.NormalPassword
+                };
+                string json = JsonConvert.SerializeObject(inputModelEmployee);
+                StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
+                HttpResponseMessage response = await httpClient.PostAsync("https://localhost:44357/api/Authentication", data);
+                if (response.IsSuccessStatusCode)
                 {
                     _logger.LogInformation("User logged in.");
+                    string jsonToken = await response.Content.ReadAsStringAsync();
+                    TokenDTO token = JsonConvert.DeserializeObject<TokenDTO>(jsonToken);
+                    string jsonWebToken = token.Token;
+                    HttpContext.Response.Cookies.Append("JWTCookie", jsonWebToken, new CookieOptions() { HttpOnly = true, Secure = true });
+                    returnUrl = "/Home/Index";
                     return LocalRedirect(returnUrl);
-                }
-                if (result.RequiresTwoFactor)
-                {
-                    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
-                }
-                if (result.IsLockedOut)
-                {
-                    _logger.LogWarning("User account locked out.");
-                    return RedirectToPage("./Lockout");
                 }
                 else
                 {

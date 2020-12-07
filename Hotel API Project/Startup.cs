@@ -50,7 +50,7 @@ namespace Hotel_API_Project
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;//the UseAuthentication() middleware in the Configure method will use this scheme(Bearer Scheme)
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme; //the [Authorize] attribute will use this scheme(Bearer scheme)
-            })
+            }).AddCookie(configuration => configuration.SlidingExpiration = true)
             .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -61,7 +61,8 @@ namespace Hotel_API_Project
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = "http://localhost:5000",
                         ValidAudience = "http://localhost:5000",
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKey@345"))
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKey@345")),
+                        ClockSkew = TimeSpan.FromMinutes(5)
                     };
                 });
 

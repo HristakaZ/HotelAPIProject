@@ -21,16 +21,21 @@ namespace Hotel_API_Project.Controllers.ApiControllers
     public class AuthenticationController : ControllerBase
     {
         private IEmployeeRepository iEmployeeRepository;
+        private IPositionRepository iPositionRepository;
         private UserManager<EmployeeApplicationUser> userManager;
         public AuthenticationController(IEmployeeRepository iEmployeeRepository,
-            UserManager<EmployeeApplicationUser> userManager)
+            UserManager<EmployeeApplicationUser> userManager,
+            IPositionRepository iPositionRepository)
         {
             this.iEmployeeRepository = iEmployeeRepository;
             this.userManager = userManager;
+            this.iPositionRepository = iPositionRepository;
         }
-        [HttpPost(Name = "Login")]
+        [HttpPost]
         public IActionResult Login(EmployeeViewModel employeeViewModel)
         {
+            //TO DO: make a try-catch block afterwards(what if the employee is null ???)
+            //TO DO: you can make an overload of GetEmployees(adding an optional Func<> as a select(so as to use it as a select)) in the employee repository
             EmployeeApplicationUser employee = new EmployeeApplicationUser();
             employee = iEmployeeRepository.GetEmployees().Where(x => x.UserName == employeeViewModel.UserName).FirstOrDefault();
             PasswordVerificationResult isNormalPasswordEqualToHashedPassword =
@@ -43,10 +48,19 @@ namespace Hotel_API_Project.Controllers.ApiControllers
                 {
                     SymmetricSecurityKey secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKey@345"));
                     SigningCredentials signInCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
+                    List<Claim> claims = new List<Claim>()
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, employee.Id.ToString()),
+                        new Claim(ClaimTypes.Name, employee.UserName)
+                    };
+                    if (employee.Position != null)
+                    {
+                        claims.Add(new Claim(ClaimTypes.Role, employee.Position.Name));
+                    }
                     JwtSecurityToken tokenOptions = new JwtSecurityToken(
                         issuer: "http://localhost:5000",
                         audience: "http://localhost:5000",
-                        claims: new List<Claim>(),
+                        claims: claims,
                         expires: DateTime.Now.AddMinutes(5),
                         signingCredentials: signInCredentials
                     );
