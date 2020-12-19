@@ -1,5 +1,5 @@
 ﻿@model DataStructure.EmployeeApplicationUser
-
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor
 @{
     ViewData["Title"] = "Delete";
 }
@@ -30,6 +30,9 @@
                     url: url,
                     accepts: 'json',
                     contentType: 'application/json',
+                    headers: {
+                    Authorization: 'Bearer ' + "@httpContextAccessor.HttpContext.Request.Cookies["JWTCookie"]"
+                    },
                     data: JSON.stringify(employeeID),
                     success: function (data) {
                         alert('Success! Deleted Employee with ID: ' + employeeID);

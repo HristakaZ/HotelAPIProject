@@ -7,6 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Hotel_API_Project.Models;
 using System.Net.Http;
+using Hotel_API_Project.ViewModels;
+using Hotel_API_Project.DTOs;
+using Newtonsoft.Json;
+using System.Text;
+using Microsoft.AspNetCore.Http;
 
 namespace Hotel_API_Project.Controllers
 {

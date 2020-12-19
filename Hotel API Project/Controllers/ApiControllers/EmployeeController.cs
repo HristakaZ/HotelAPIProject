@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using DataAccess.Repositories;
@@ -29,29 +30,32 @@ namespace Hotel_API_Project.Controllers.ApiControllers
             this.htmlEncoder = htmlEncoder;
         }
         // GET: api/<EmployeeController>
-        [HttpGet/*, Authorize(Roles = "No Position!")*/]
+        [HttpGet, Authorize]
         public List<EmployeeApplicationUser> GetEmployees()
         {
             List<EmployeeApplicationUser> employees = iEmployeeRepository.GetEmployees();
             List<PositionApplicationRole> positions = iPositionRepository.GetPositions();
             /*encoding(against xss) at the get request, so as to store the entity column in its plain form in the database*/
-            employees.ForEach(x =>
+            if (employees != null)
             {
-                if (x != null)
+                employees.ForEach(x =>
                 {
-                    string encodedEmployeeUserName = htmlEncoder.Encode(x.UserName);
-                    x.UserName = encodedEmployeeUserName;
-                    if (x.Position != null)
+                    if (x != null)
                     {
-                        string encodedEmployeePosition = htmlEncoder.Encode(x.Position.Name);
-                        x.Position.Name = encodedEmployeePosition;
+                        string encodedEmployeeUserName = htmlEncoder.Encode(x.UserName);
+                        x.UserName = encodedEmployeeUserName;
+                        if (x.Position != null)
+                        {
+                            string encodedEmployeePosition = htmlEncoder.Encode(x.Position.Name);
+                            x.Position.Name = encodedEmployeePosition;
+                        }
+                        if (x.Position == null)
+                        {
+                            x.Position = positions.Where(x => x.Name == "No Position!").FirstOrDefault();
+                        }
                     }
-                    if (x.Position == null)
-                    {
-                        x.Position = positions.Where(x => x.Name == "No Position!").FirstOrDefault();
-                    }
-                }
-            });
+                });
+            }
             return employees;
         }
 

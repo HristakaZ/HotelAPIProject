@@ -52,19 +52,19 @@ namespace Hotel_API_Project
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme; //the [Authorize] attribute will use this scheme(Bearer scheme)
             }).AddCookie(configuration => configuration.SlidingExpiration = true)
             .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = "http://localhost:5000",
-                        ValidAudience = "http://localhost:5000",
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKey@345")),
-                        ClockSkew = TimeSpan.FromMinutes(5)
-                    };
-                });
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = "http://localhost:5000",
+                    ValidAudience = "http://localhost:5000",
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKey@345")),
+                    ClockSkew = TimeSpan.FromMinutes(5)
+                };
+            });
 
             services.AddControllersWithViews().AddRazorRuntimeCompilation()
                 //ignoring endless reference loops when obtaining a relationship from one entity to another
@@ -85,7 +85,7 @@ namespace Hotel_API_Project
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        { 
+        {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

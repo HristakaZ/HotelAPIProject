@@ -1,10 +1,12 @@
 ﻿@model IEnumerable<DataStructure.EmployeeApplicationUser>
-
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor
 @{
     ViewData["Title"] = "Employees";
 }
 
 <h1>Employees</h1>
+<h1>@httpContextAccessor.HttpContext.User.Identity.IsAuthenticated</h1>
+<h1>@User.Identity.IsAuthenticated</h1>
 <script src="~/lib/jquery/dist/jquery.js"></script>
 <!--TO DO: make the needed API calls to obtain the info-->
 <script type="text/javascript">
@@ -23,6 +25,9 @@
                 url: url,
                 contentType: 'application/json',
                 accepts: 'json',
+                headers: {
+                    Authorization: 'Bearer ' + "@httpContextAccessor.HttpContext.Request.Cookies["JWTCookie"]"
+                },
                 success: function (data) {
                     $.each(data, function (index, val) {
                         let linkForUpdate = $('<a>');
@@ -40,7 +45,6 @@
                     })
                 }
             });
-
         });
     }
 </script>

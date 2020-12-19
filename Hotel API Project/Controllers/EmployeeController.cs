@@ -24,7 +24,7 @@ namespace Hotel_API_Project.Controllers
         {
             return View();
         }
-        public ActionResult Delete(int id)
+        public ActionResult Delete()
         {
             return View();
         }

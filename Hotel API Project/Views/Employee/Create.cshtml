@@ -1,11 +1,12 @@
 ﻿@model DataStructure.EmployeeApplicationUser
-
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor
 @{
     ViewData["Title"] = "Create";
 }
 
 <script src="~/lib/jquery/dist/jquery.js"></script>
-
+<script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+<reference path="~/lib/jquery-validation/dist/jquery.validate.js" />
 <h1>Create An Employee</h1>
 
 <hr />
@@ -48,6 +49,9 @@
                     type: 'POST',
                     contentType: 'application/json',
                     accepts: 'json',
+                    headers: {
+                    Authorization: 'Bearer ' + "@httpContextAccessor.HttpContext.Request.Cookies["JWTCookie"]"
+                    },
                     data: JSON.stringify(employee),
                     success: function (data) {
                         alert('Success, send the data to the create action of the employee controller. Created Employee with ID: ' + data);
@@ -67,21 +71,29 @@
     getEmployeePosition();
     createEmployee();
 </script>
+<style>
+    .error {
+        color: red;
+    }
+</style>
+<form id="myForm">
+    <div style="margin-bottom: 15px">
+        <input type="text" name="empName" placeholder="Employee Name" id="empName" required />
+    </div>
 
-<div style="margin-bottom: 15px">
-    <input type="text" name="empName" placeholder="Employee Name" id="empName" />
-</div>
+    <div style="margin-bottom: 15px">
+        <select id="positionDropDownList" name="positionDropDownList" required>
+            <option>Enter The Employee Position</option>
+        </select>
+    </div>
 
-<div style="margin-bottom: 15px">
-    <select id="positionDropDownList" name="positionDropDownList">
-        <option>Enter The Employee Position</option>
-    </select>
-</div>
-
-<div style="margin-bottom: 15px">
-    <input type="submit" name="createEmployee" value="Create An Employee" id="btnEmployeeCreate" />
-</div>
-
+    <div style="margin-bottom: 15px">
+        <input type="button" name="createEmployee" value="Create An Employee" id="btnEmployeeCreate" />
+    </div>
+</form>
+<script>
+    $("#myForm").validate();
+</script>
 <div>
     <a asp-action="Index">Back to List</a>
 </div>

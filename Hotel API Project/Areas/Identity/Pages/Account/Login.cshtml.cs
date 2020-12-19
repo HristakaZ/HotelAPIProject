@@ -102,7 +102,7 @@ namespace Hotel_API_Project.Areas.Identity.Pages.Account
                     string jsonToken = await response.Content.ReadAsStringAsync();
                     TokenDTO token = JsonConvert.DeserializeObject<TokenDTO>(jsonToken);
                     string jsonWebToken = token.Token;
-                    HttpContext.Response.Cookies.Append("JWTCookie", jsonWebToken, new CookieOptions() { HttpOnly = true, Secure = true });
+                    HttpContext.Response.Cookies.Append("JWTCookie", jsonWebToken, new CookieOptions() { HttpOnly = true, Secure = true});
                     returnUrl = "/Home/Index";
                     return LocalRedirect(returnUrl);
                 }

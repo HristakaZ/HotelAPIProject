@@ -1,5 +1,5 @@
 ﻿@model DataStructure.EmployeeApplicationUser
-
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor
 @{
     ViewData["Title"] = "Update";
 }
@@ -59,6 +59,9 @@
                     url: url,
                     accepts: 'json',
                     contentType: 'application/json',
+                    headers: {
+                    Authorization: 'Bearer ' + "@httpContextAccessor.HttpContext.Request.Cookies["JWTCookie"]"
+                    },
                     data: JSON.stringify(employee),
                     success: function (data) {
                         alert('Success! Edited Employee with ID: ' + employeeID);
