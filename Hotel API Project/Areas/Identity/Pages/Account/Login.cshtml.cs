@@ -20,6 +20,10 @@ using Newtonsoft.Json;
 using System.Text;
 using Microsoft.AspNetCore.Http;
 using Hotel_API_Project.DTOs;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using System.Security.Principal;
 
 namespace Hotel_API_Project.Areas.Identity.Pages.Account
 {
@@ -104,6 +108,14 @@ namespace Hotel_API_Project.Areas.Identity.Pages.Account
                     string jsonWebToken = token.Token;
                     HttpContext.Response.Cookies.Append("JWTCookie", jsonWebToken, new CookieOptions() { HttpOnly = true, Secure = true});
                     returnUrl = "/Home/Index";
+                    SecurityTokenHandler handler = new JwtSecurityTokenHandler();
+                    JwtSecurityToken decodedJsonWebToken = handler.ReadToken(jsonWebToken) as JwtSecurityToken;
+                    string userIDClaim = decodedJsonWebToken.Claims.Where(x => x.Type.Contains("nameidentifier")).FirstOrDefault().Value;
+                    EmployeeApplicationUser currentEmployeeUser = iEmployeeRepository.GetEmployeeByID(int.Parse(userIDClaim));
+                    bool isAuthenticated = currentEmployeeUser.Id != 0;
+                    HttpContext.Session.SetString("IsAuthenticated", isAuthenticated.ToString().ToLower());
+                    HttpContext.Session.SetString("UserName", currentEmployeeUser.UserName);
+                    HttpContext.Session.SetString("Role", currentEmployeeUser.Position.Name);
                     return LocalRedirect(returnUrl);
                 }
                 else

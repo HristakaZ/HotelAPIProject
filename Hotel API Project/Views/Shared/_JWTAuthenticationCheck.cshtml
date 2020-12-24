@@ -1,0 +1,11 @@
+﻿@using Microsoft.AspNetCore.Http
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    string isAuthenticated = Context.Session.GetString("IsAuthenticated");
+    if (isAuthenticated == null || isAuthenticated == "false")
+    {
+        Context.Response.Redirect("/Identity/Account/Login");
+    }
+}

@@ -18,6 +18,8 @@ using Hotel_API_Project.Mappers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Http;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Hotel_API_Project
 {
@@ -66,6 +68,8 @@ namespace Hotel_API_Project
                 };
             });
 
+            services.AddSession(s => s.IdleTimeout = TimeSpan.FromMinutes(30));
+
             services.AddControllersWithViews().AddRazorRuntimeCompilation()
                 //ignoring endless reference loops when obtaining a relationship from one entity to another
                 .AddNewtonsoftJson(options =>
@@ -113,6 +117,8 @@ namespace Hotel_API_Project
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseSession();
 
             app.UseEndpoints(endpoints =>
             {
