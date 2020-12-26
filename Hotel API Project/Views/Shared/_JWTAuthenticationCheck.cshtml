@@ -4,7 +4,7 @@
 *@
 @{
     string isAuthenticated = Context.Session.GetString("IsAuthenticated");
-    if (isAuthenticated == null || isAuthenticated == "false")
+    if (isAuthenticated == null || isAuthenticated == "false" || Context.Request.Cookies["JWTCookie"] == null)
     {
         Context.Response.Redirect("/Identity/Account/Login");
     }

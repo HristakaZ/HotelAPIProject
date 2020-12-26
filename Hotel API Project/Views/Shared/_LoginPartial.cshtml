@@ -8,7 +8,7 @@
     @{
         string isAuthenticated = Context.Session.GetString("IsAuthenticated");
         string userName = Context.Session.GetString("UserName");
-        if (isAuthenticated == "true")
+        if (isAuthenticated == "true" && Context.Request.Cookies["JWTCookie"] != null)
         {
             <li class="nav-item">
                 <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @userName!</a>
