@@ -82,29 +82,33 @@
     updateEmployee();
 </script>
 
+@{
+    await Html.RenderPartialAsync("_JWTAuthenticationCheck");
+}
 
-<div>
-    <input type="hidden" id="empID" />
-</div>
+<form id="myForm">
+    <div>
+        <input type="hidden" id="empID" />
+    </div>
 
-<div style="margin-bottom: 15px">
-    <input type="text" name="Employee Name" placeholder="Employee Name" id="empName" />
-</div>
+    <div style="margin-bottom: 15px">
+        <input type="text" name="Employee Name" placeholder="Employee Name" id="empName" required />
+    </div>
 
-<div style="margin-bottom: 15px">
-    <select id="positionDropDownList" name="positionDropDownList">
-        <option>Enter The Employee Position</option>
-    </select>
-</div>
+    <div style="margin-bottom: 15px">
+        <select id="positionDropDownList" name="positionDropDownList" required>
+            <option>Enter The Employee Position</option>
+        </select>
+    </div>
 
-<div style="margin-bottom: 15px">
-    <input type="submit" name="updateEmployee" value="Update The Employee" id="btnEmployeeUpdate" />
-</div>
+    <div style="margin-bottom: 15px">
+        <input type="submit" name="updateEmployee" value="Update The Employee" id="btnEmployeeUpdate" />
+    </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
+    <div>
+        <a asp-action="Index">Back to List</a>
+    </div>
+</form>
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

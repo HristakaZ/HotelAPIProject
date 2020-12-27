@@ -111,11 +111,13 @@ namespace Hotel_API_Project.Areas.Identity.Pages.Account
                     SecurityTokenHandler handler = new JwtSecurityTokenHandler();
                     JwtSecurityToken decodedJsonWebToken = handler.ReadToken(jsonWebToken) as JwtSecurityToken;
                     string userIDClaim = decodedJsonWebToken.Claims.Where(x => x.Type.Contains("nameidentifier")).FirstOrDefault().Value;
+                    DateTime jwtExpirationDate = decodedJsonWebToken.ValidTo.ToLocalTime();
                     EmployeeApplicationUser currentEmployeeUser = iEmployeeRepository.GetEmployeeByID(int.Parse(userIDClaim));
                     bool isAuthenticated = currentEmployeeUser.Id != 0;
                     HttpContext.Session.SetString("IsAuthenticated", isAuthenticated.ToString().ToLower());
                     HttpContext.Session.SetString("UserName", currentEmployeeUser.UserName);
                     HttpContext.Session.SetString("Role", currentEmployeeUser.Position.Name);
+                    HttpContext.Session.SetString("JWTExpirationDate", jwtExpirationDate.ToString());
                     return LocalRedirect(returnUrl);
                 }
                 else

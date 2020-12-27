@@ -4,7 +4,9 @@
 *@
 @{
     string isAuthenticated = Context.Session.GetString("IsAuthenticated");
-    if (isAuthenticated == null || isAuthenticated == "false" || Context.Request.Cookies["JWTCookie"] == null)
+    string jwtExpirationDateString = Context.Session.GetString("JWTExpirationDate");
+    DateTime jwtExpirationDate = jwtExpirationDateString != null ? DateTime.Parse(jwtExpirationDateString) : default(DateTime);
+    if (isAuthenticated == null || isAuthenticated == "false" || Context.Request.Cookies["JWTCookie"] == null || jwtExpirationDate < DateTime.Now)
     {
         Context.Response.Redirect("/Identity/Account/Login");
     }
