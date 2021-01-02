@@ -1,10 +1,12 @@
 ﻿@model DataStructure.RoomType
-
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor
 @{
     ViewData["Title"] = "Create";
 }
 
-<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+<reference path="~/lib/jquery-validation/dist/jquery.validate.js" />
 
 <h1>Create A RoomType</h1>
 
@@ -18,20 +20,23 @@
                 let roomTypeName = $('#roomTypeName').val();
                 let roomType = {
                     name: roomTypeName
-                    /* more info to be added here */
                 };
                 $.ajax({
                     url: url,
                     type: 'POST',
                     contentType: 'application/json',
                     accepts: 'json',
+                    headers: {
+                        "Authorization": 'Bearer ' + "@httpContextAccessor.HttpContext.Request.Cookies["JWTCookie"]",
+                        "X-XSRF-TOKEN": $('#XSRFToken').val()
+                    },
                     data: JSON.stringify(roomType),
                     success: function (data) {
                         alert('Success, send the data to the create action of the roomtype controller. Created RoomType with ID: ' + data);
                         window.location.href = "https://localhost:44357/RoomType/Index";
                     },
                     error: function (data) {
-                        alert('Error: ' + data.responseText);
+                        alert('One or more validation errors occured! Please check the validation messages!');
                     }
                 });
             });
@@ -40,19 +45,42 @@
     }
 </script>
 
+@{
+    await Html.RenderPartialAsync("_JWTAuthenticationCheck");
+}
+
 <script>
     createRoomType();
 </script>
 
-<div style="margin-bottom: 15px">
-    <input type="text" name="roomTypeName" placeholder="Room Type Name" id="roomTypeName" />
-    
-</div>
+@*using form method="dialog" because post will not go into the success ajax callback function and will not redirect the user to the needed
+    page, also, ajax doesn't work the traditional "post" way of sending the form information and then removing it from the form*@
+<form method="dialog" id="myForm">
+    <div>
+        <input type="hidden" id="XSRFToken"
+               name="XSRFToken" value="@httpContextAccessor.HttpContext.Request.Cookies["XSRF-TOKEN"]">
+    </div>
 
-<div style="margin-bottom: 15px">
-    <input type="submit" name="createRoomType" value="Create A RoomType" id="btnRoomTypeCreate" />
-</div>
+    <div style="margin-bottom: 15px">
+        <input type="text" name="roomTypeName" placeholder="Room Type Name" id="roomTypeName" required />
+    </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+    <div style="margin-bottom: 15px">
+        <input type="submit" name="createRoomType" value="Create A RoomType" id="btnRoomTypeCreate" />
+    </div>
+
+    <div>
+        <a asp-action="Index">Back to List</a>
+    </div>
+</form>
+
+<script>
+    $('#myForm').validate();
+</script>
+
+<style>
+    .error {
+        color: red;
+        font-family: verdana, Helvetica;
+    }
+</style>

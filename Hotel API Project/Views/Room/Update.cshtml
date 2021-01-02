@@ -1,5 +1,5 @@
 ﻿@model DataStructure.Room
-
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor
 @{
     ViewData["Title"] = "Update";
 }
@@ -25,6 +25,9 @@
             type: 'GET',
             url: urlForRoomType,
             contentType: 'application/json',
+            headers: {
+                "Authorization": 'Bearer ' + "@httpContextAccessor.HttpContext.Request.Cookies["JWTCookie"]"
+            },
             success: function (data) {
                 let roomTypeDropDownList = $('#roomTypeDropDownList');
                 $.each(data, function (index, val) {
@@ -53,7 +56,6 @@
                     id: roomID,
                     number: roomNumber,
                     roomType: roomType
-                    /* more info to be added here */
                 };
                 let url = 'https://localhost:44357/api/Room/' + roomID;
                 $.ajax({
@@ -62,12 +64,16 @@
                     accepts: 'json',
                     contentType: 'application/json',
                     data: JSON.stringify(room),
+                    headers: {
+                        "Authorization": 'Bearer ' + "@httpContextAccessor.HttpContext.Request.Cookies["JWTCookie"]",
+                        "X-XSRF-TOKEN": $('#XSRFToken').val()
+                    },
                     success: function (data) {
                         alert('Success! Edited Room with ID: ' + roomID);
                         window.location.href = "https://localhost:44357/Room/Index";
                     },
                     error: function (data) {
-                        alert('Error!: ' + data.responseText);
+                        alert('Oops, an error occured, please try again later!' + data.responseText);
                     }
                 });
             });
@@ -75,30 +81,42 @@
     }
 </script>
 
+@{
+    await Html.RenderPartialAsync("_JWTAuthenticationCheck");
+}
+
 <script type="text/javascript">
     getRoomIDThroughURL();
     getRoomTypes();
     updateRoom();
 </script>
 
+@*using form method="dialog" because post will not go into the success ajax callback function and will not redirect the user to the needed
+    page, also, ajax doesn't work the traditional "post" way of sending the form information and then removing it from the form*@
+<form method="dialog" id="myForm">
+    <div>
+        <input type="hidden" id="XSRFToken"
+               name="XSRFToken" value="@httpContextAccessor.HttpContext.Request.Cookies["XSRF-TOKEN"]">
+    </div>
 
-<div>
-    <input type="hidden" id="roomID" />
-</div>
+    <div>
+        <input type="hidden" id="roomID" />
+    </div>
 
-<div style="margin-bottom: 15px">
-    <input type="text" name="Room Number" placeholder="Room Number" id="roomNumber" />
-</div>
+    <div style="margin-bottom: 15px">
+        <input type="text" name="Room Number" placeholder="Room Number" id="roomNumber" value=0 />
+    </div>
 
-<div style="margin-bottom: 15px">
-    <select id="roomTypeDropDownList" name="roomTypeDropDownList">
-        <option>Enter The RoomType</option>
-    </select>
-</div>
+    <div style="margin-bottom: 15px">
+        <select id="roomTypeDropDownList" name="roomTypeDropDownList">
+            <option value="">Enter The RoomType</option>
+        </select>
+    </div>
 
-<div style="margin-bottom: 15px">
-    <input type="submit" name="updateRoom" value="Update The Room" id="btnRoomUpdate" />
-</div>
+    <div style="margin-bottom: 15px">
+        <input type="submit" name="updateRoom" value="Update The Room" id="btnRoomUpdate" />
+    </div>
+</form>
 
 <div>
     <a asp-action="Index">Back to List</a>

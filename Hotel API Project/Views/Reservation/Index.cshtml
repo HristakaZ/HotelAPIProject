@@ -1,5 +1,5 @@
 ﻿@model IEnumerable<DataStructure.Reservation>
-
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor
 @{
     ViewData["Title"] = "Reservations";
 }
@@ -23,6 +23,9 @@
                 url: url,
                 contentType: 'application/json',
                 accepts: 'json',
+                headers: {
+                    Authorization: 'Bearer ' + "@httpContextAccessor.HttpContext.Request.Cookies["JWTCookie"]"
+                },
                 success: function (data) {
                     $.each(data, function (index, val) {
                         let linkForUpdate = $('<a>');
@@ -53,6 +56,10 @@
         });
     }
 </script>
+
+@{
+    await Html.RenderPartialAsync("_JWTAuthenticationCheck");
+}
 
 <script>
     getReservations();

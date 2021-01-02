@@ -1,5 +1,5 @@
 ﻿@model DataStructure.PositionApplicationRole
-
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor
 @{
     ViewData["Title"] = "Update";
 }
@@ -36,13 +36,17 @@
                     url: url,
                     accepts: 'json',
                     contentType: 'application/json',
+                    headers: {
+                        "Authorization": 'Bearer ' + "@httpContextAccessor.HttpContext.Request.Cookies["JWTCookie"]",
+                        "X-XSRF-TOKEN": $('#XSRFToken').val()
+                    },
                     data: JSON.stringify(position),
                     success: function (data) {
                         alert('Success! Edited Position with ID: ' + positionID);
                         window.location.href = "https://localhost:44357/Position/Index";
                     },
                     error: function (data) {
-                        alert('Error!: ' + data.responseText);
+                        alert('Oops, an error occured, please try again later!');
                     }
                 });
             });
@@ -50,11 +54,19 @@
     }
 </script>
 
+@{
+    await Html.RenderPartialAsync("_JWTAuthenticationCheck");
+}
+
 <script type="text/javascript">
     getPositionIDThroughURL();
     updatePosition();
 </script>
 
+<div>
+    <input type="hidden" id="XSRFToken"
+           name="XSRFToken" value="@httpContextAccessor.HttpContext.Request.Cookies["XSRF-TOKEN"]">
+</div>
 
 <div>
     <input type="hidden" id="positionID" />

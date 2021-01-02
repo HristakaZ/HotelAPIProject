@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace Hotel_API_Project.Mappers
 {
-    public interface IReservationMapper
+    public interface IUpdateRoomMapper
     {
-        Reservation MapReservationViewModelToModel(ReservationViewModel reservationViewModel, Reservation reservation);
+        public Room MapUpdateRoomViewModelToModel(UpdateRoomViewModel updateRoomViewModel, Room room);
     }
 }

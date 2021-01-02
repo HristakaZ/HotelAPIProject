@@ -3,14 +3,15 @@
 @{
     ViewData["Title"] = "Update";
 }
-
 <h1>Update</h1>
 
 <h4>Employees</h4>
 
 <hr />
 
-<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+<reference path="~/lib/jquery-validation/dist/jquery.validate.js" />
 
 <script>
     function getEmployeeIDThroughURL() {
@@ -25,6 +26,9 @@
             type: 'GET',
             url: urlForEmployeePosition,
             contentType: 'application/json',
+            headers: {
+                "Authorization": 'Bearer ' + "@httpContextAccessor.HttpContext.Request.Cookies["JWTCookie"]"
+            },
             success: function (data) {
                 let positionDropDownList = $('#positionDropDownList');
                 $.each(data, function (index, val) {
@@ -60,7 +64,8 @@
                     accepts: 'json',
                     contentType: 'application/json',
                     headers: {
-                    Authorization: 'Bearer ' + "@httpContextAccessor.HttpContext.Request.Cookies["JWTCookie"]"
+                        "Authorization": 'Bearer ' + "@httpContextAccessor.HttpContext.Request.Cookies["JWTCookie"]",
+                        "X-XSRF-TOKEN": $('#XSRFToken').val()
                     },
                     data: JSON.stringify(employee),
                     success: function (data) {
@@ -68,7 +73,7 @@
                         window.location.href = "https://localhost:44357/Employee/Index";
                     },
                     error: function (data) {
-                        alert('Error!: ' + data.responseText);
+                        alert('Oops, an error occured, please try again later!');
                     }
                 });
             });
@@ -76,39 +81,41 @@
     }
 </script>
 
+@{
+    await Html.RenderPartialAsync("_JWTAuthenticationCheck");
+}
+
 <script type="text/javascript">
     getEmployeeIDThroughURL();
     getEmployeePosition();
     updateEmployee();
 </script>
 
-@{
-    await Html.RenderPartialAsync("_JWTAuthenticationCheck");
-}
+<div>
+    <input type="hidden" id="XSRFToken"
+           name="XSRFToken" value="@httpContextAccessor.HttpContext.Request.Cookies["XSRF-TOKEN"]">
+</div>
 
-<form id="myForm">
-    <div>
-        <input type="hidden" id="empID" />
-    </div>
+<div>
+    <input type="hidden" id="empID" />
+</div>
 
-    <div style="margin-bottom: 15px">
-        <input type="text" name="Employee Name" placeholder="Employee Name" id="empName" required />
-    </div>
+<div style="margin-bottom: 15px">
+    <input type="text" name="empName" placeholder="Employee Name" id="empName" />
+</div>
 
-    <div style="margin-bottom: 15px">
-        <select id="positionDropDownList" name="positionDropDownList" required>
-            <option>Enter The Employee Position</option>
-        </select>
-    </div>
+<div style="margin-bottom: 15px">
+    <select id="positionDropDownList" name="positionDropDownList">
+        <option value=0>Enter The Employee Position</option>
+    </select>
+</div>
 
-    <div style="margin-bottom: 15px">
-        <input type="submit" name="updateEmployee" value="Update The Employee" id="btnEmployeeUpdate" />
-    </div>
-
-    <div>
-        <a asp-action="Index">Back to List</a>
-    </div>
-</form>
+<div style="margin-bottom: 15px">
+    <input type="submit" name="updateEmployee" value="Update The Employee" id="btnEmployeeUpdate" />
+</div>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

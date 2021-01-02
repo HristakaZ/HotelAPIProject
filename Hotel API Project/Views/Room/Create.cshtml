@@ -1,10 +1,12 @@
 ﻿@model DataStructure.Room
-
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor
 @{
     ViewData["Title"] = "Create";
 }
 
-<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+<reference path="~/lib/jquery-validation/dist/jquery.validate.js" />
 
 <h1>Create A Room</h1>
 
@@ -23,7 +25,6 @@
                 let room = {
                     number: roomNumber,
                     roomType: roomType
-                    /* more info to be added here */
                 };
                 $.ajax({
                     url: url,
@@ -31,12 +32,16 @@
                     contentType: 'application/json',
                     accepts: 'json',
                     data: JSON.stringify(room),
+                    headers: {
+                        "Authorization": 'Bearer ' + "@httpContextAccessor.HttpContext.Request.Cookies["JWTCookie"]",
+                        "X-XSRF-TOKEN": $('#XSRFToken').val()
+                    },
                     success: function (data) {
                         alert('Success, send the data to the create action of the room controller. Created Room with ID: ' + data);
                         window.location.href = "https://localhost:44357/Room/Index";
                     },
                     error: function (data) {
-                        alert('Error: ' + data.responseText);
+                        alert('One or more validation errors occured! Please check the validation messages!');
                     }
                 });
             });
@@ -49,6 +54,9 @@
             type: 'GET',
             url: urlForRoomType,
             contentType: 'application/json',
+            headers: {
+                "Authorization": 'Bearer ' + "@httpContextAccessor.HttpContext.Request.Cookies["JWTCookie"]"
+            },
             success: function (data) {
                 let roomTypeDropDownList = $('#roomTypeDropDownList');
                 $.each(data, function (index, val) {
@@ -64,25 +72,47 @@
     }
 </script>
 
+@{
+    await Html.RenderPartialAsync("_JWTAuthenticationCheck");
+}
+
 <script>
     getRoomTypes();
     createRoom();
 </script>
+@*using form method="dialog" because post will not go into the success ajax callback function and will not redirect the user to the needed
+    page, also, ajax doesn't work the traditional "post" way of sending the form information and then removing it from the form*@
+<form method="dialog" id="myForm">
+    <div>
+        <input type="hidden" id="XSRFToken"
+               name="XSRFToken" value="@httpContextAccessor.HttpContext.Request.Cookies["XSRF-TOKEN"]">
+    </div>
 
-<div style="margin-bottom: 15px">
-    <input type="text" name="roomNumber" placeholder="Room Number" id="roomNumber" />
-    
-</div>
+    <div style="margin-bottom: 15px">
+        <input type="text" name="roomNumber" placeholder="Room Number" id="roomNumber" required />
+    </div>
 
-<div style="margin-bottom: 15px">
-    <select id="roomTypeDropDownList" name="roomTypeDropDownList">
-        <option>Enter The RoomType</option>
-    </select>
-</div>
+    <div style="margin-bottom: 15px">
+        <select id="roomTypeDropDownList" name="roomTypeDropDownList" required>
+            <option value="">Enter The RoomType</option>
+        </select>
+    </div>
 
-<div style="margin-bottom: 15px">
-    <input type="submit" name="createRoom" value="Create A Room" id="btnRoomCreate" />
-</div>
+    <div style="margin-bottom: 15px">
+        <input type="submit" name="createRoom" value="Create A Room" id="btnRoomCreate" />
+    </div>
+</form>
+
+<script>
+    $('#myForm').validate();
+</script>
+
+<style>
+    .error {
+        color: red;
+        font-family: verdana, Helvetica;
+    }
+</style>
 
 <div>
     <a asp-action="Index">Back to List</a>

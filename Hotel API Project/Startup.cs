@@ -20,6 +20,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Http;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Antiforgery;
+using Hotel_API_Project.Services;
 
 namespace Hotel_API_Project
 {
@@ -70,6 +72,12 @@ namespace Hotel_API_Project
 
             services.AddSession(s => s.IdleTimeout = TimeSpan.FromMinutes(30));
 
+            services.AddAntiforgery(options =>
+            {
+                options.HeaderName = "X-XSRF-TOKEN";
+                options.SuppressXFrameOptionsHeader = false;
+            });
+
             services.AddControllersWithViews().AddRazorRuntimeCompilation()
                 //ignoring endless reference loops when obtaining a relationship from one entity to another
                 .AddNewtonsoftJson(options =>
@@ -84,11 +92,17 @@ namespace Hotel_API_Project
             services.AddScoped<IPositionRepository, PositionRepository>();
             services.AddScoped<IRoomTypeRepository, RoomTypeRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped<IReservationMapper, ReservationMapper>();
+            services.AddScoped<ICreateReservationMapper, CreateReservationMapper>();
+            services.AddScoped<IUpdateReservationMapper, UpdateReservationMapper>();
+            services.AddScoped<IUpdateRoomMapper, UpdateRoomMapper>();
+            services.AddScoped<ICreateRoomTypeMapper, CreateRoomTypeMapper>();
+            services.AddScoped<IUpdateRoomTypeMapper, UpdateRoomTypeMapper>();
+            services.AddScoped<IUpdateReservationValidationService, UpdateReservationValidationService>();
+            services.AddScoped<IUpdateRoomValidationService, UpdateRoomValidationService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IAntiforgery antiforgery)
         {
             if (env.IsDevelopment())
             {
@@ -119,6 +133,19 @@ namespace Hotel_API_Project
             app.UseAuthorization();
 
             app.UseSession();
+
+            app.Use(next => context =>
+            {
+                string path = context.Request.Path.Value;
+                var tokens = antiforgery.GetAndStoreTokens(context);
+                context.Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken,
+                     new CookieOptions()
+                     {
+                         HttpOnly = false,
+                         Secure = true
+                     }); // set false if not using SSL });
+                   return next(context);
+            });
 
             app.UseEndpoints(endpoints =>
             {

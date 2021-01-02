@@ -5,6 +5,8 @@ using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using DataAccess.Repositories;
 using DataStructure;
+using Hotel_API_Project.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,12 +26,13 @@ namespace Hotel_API_Project.Controllers.ApiControllers
             this.htmlEncoder = htmlEncoder;
         }
         // GET: api/<PositionController>
-        [HttpGet]
+        [HttpGet, Authorize]
         public List<PositionApplicationRole> GetPositions()
         {
             List<PositionApplicationRole> positions = iPositionRepository.GetPositions();
             /*encoding(against xss) at the get request, so as to store the entity column in its plain form in the database*/
-            positions.ForEach(x => {
+            positions.ForEach(x =>
+            {
                 if (x != null)
                 {
                     string encodedPositionName = htmlEncoder.Encode(x.Name);
@@ -40,7 +43,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
 
         // GET api/<PositionController>/5
-        [HttpGet("{id}", Name = "GetPositionByID")]
+        [HttpGet("{id}", Name = "GetPositionByID"), Authorize]
         public IActionResult GetPositionByID(int id)
         {
             PositionApplicationRole position = iPositionRepository.GetPositionByID(id);
@@ -55,11 +58,16 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
 
         // POST api/<PositionController>
-        [HttpPost]
-        public IActionResult Post([FromBody] PositionApplicationRole position)
+        [HttpPost, Authorize]
+        public IActionResult Post([FromBody] CreatePositionViewModel createPositionViewModel)
         {
             try
             {
+                PositionApplicationRole position = new PositionApplicationRole()
+                {
+                    Id = createPositionViewModel.ID,
+                    Name = createPositionViewModel.Name
+                };
                 iPositionRepository.CreatePosition(position);
                 Uri uri = new Uri(Url.Link("GetPositionByID", new { Id = position.Id }));
                 iUnitOfWork.Save();
@@ -72,12 +80,22 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
 
         // PUT api/<PositionController>/5
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] PositionApplicationRole position)
+        [HttpPut("{id}"), Authorize, ValidateAntiForgeryToken]
+        public IActionResult Put(int id, [FromBody] UpdatePositionViewModel updatePositionViewModel)
         {
-            if (position != null)
+            if (updatePositionViewModel != null)
             {
-                position.Id = id;
+                updatePositionViewModel.ID = id;
+                if (string.IsNullOrEmpty(updatePositionViewModel.Name))
+                {
+                    updatePositionViewModel.Name = iPositionRepository.GetPositionByID(updatePositionViewModel.ID).Name;
+                }
+                PositionApplicationRole position = new PositionApplicationRole()
+                {
+                    Id = updatePositionViewModel.ID,
+                    Name = updatePositionViewModel.Name,
+                    Employees = iPositionRepository.GetPositionByID(updatePositionViewModel.ID).Employees
+                };
                 iPositionRepository.UpdatePosition(position);
                 iUnitOfWork.Save();
                 return Ok(position);
@@ -89,13 +107,16 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
 
         // DELETE api/<PositionController>/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}"), Authorize, ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
             PositionApplicationRole positionToDelete = iPositionRepository.GetPositionByID(id);
             if (positionToDelete != null)
             {
                 iPositionRepository.DeletePosition(positionToDelete.Id);
+                //if a certain employee has this position(the position for deletion), we are setting his position to be "No Position!"
+                positionToDelete.Employees.ForEach(x =>
+                    x.Position = iPositionRepository.GetPositions().Where(x => x.Name == "No Position!").FirstOrDefault());
                 iUnitOfWork.Save();
                 return Ok(positionToDelete);
             }

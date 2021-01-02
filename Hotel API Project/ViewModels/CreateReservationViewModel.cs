@@ -1,4 +1,6 @@
 ﻿using DataStructure;
+using Hotel_API_Project.ExtensionMethods;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -7,14 +9,19 @@ using System.Threading.Tasks;
 
 namespace Hotel_API_Project.ViewModels
 {
-    public class ReservationViewModel
+    public class CreateReservationViewModel
     {
-        [Key]
         public int ID { get; set; }
+        [Required]
+        [StartEndDateValidator]
         public DateTime StartDate { get; set; }
+        [Required]
         public DateTime EndDate { get; set; }
+        [Required]
         public virtual Guest Guest { get; set; }
+        [Required]
         public virtual EmployeeApplicationUser Employee { get; set; }
-        public virtual RoomReservation RoomReservation { get; set; }
+        [Required]
+        public virtual List<RoomReservation> RoomReservations { get; set; }
     }
 }

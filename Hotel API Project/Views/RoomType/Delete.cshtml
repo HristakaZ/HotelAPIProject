@@ -1,5 +1,5 @@
 ﻿@model DataStructure.RoomType
-
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor
 @{
     ViewData["Title"] = "Delete";
 }
@@ -30,13 +30,17 @@
                     url: url,
                     accepts: 'json',
                     contentType: 'application/json',
+                    headers: {
+                        "Authorization": 'Bearer ' + "@httpContextAccessor.HttpContext.Request.Cookies["JWTCookie"]",
+                        "X-XSRF-TOKEN": $('#XSRFToken').val()
+                    },
                     data: JSON.stringify(roomTypeID),
                     success: function (data) {
                         alert('Success! Deleted RoomType with ID: ' + roomTypeID);
                         window.location.href = "https://localhost:44357/RoomType/Index";
                     },
                     error: function (data) {
-                        alert('Error!: ' + data.responseText);
+                        alert('Oops, an error occured. Please try again later!');
                     }
                 });
             });
@@ -46,9 +50,18 @@
 
 <hr />
 
+@{
+    await Html.RenderPartialAsync("_JWTAuthenticationCheck");
+}
+
 <script type="text/javascript">
     deleteRoomType();
 </script>
+
+<div>
+    <input type="hidden" id="XSRFToken"
+           name="XSRFToken" value="@httpContextAccessor.HttpContext.Request.Cookies["XSRF-TOKEN"]">
+</div>
 
 <div>
     <input type="hidden" id="roomTypeID" />

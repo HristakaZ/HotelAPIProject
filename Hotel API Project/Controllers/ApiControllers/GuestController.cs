@@ -5,6 +5,8 @@ using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using DataAccess.Repositories;
 using DataStructure;
+using Hotel_API_Project.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,12 +26,13 @@ namespace Hotel_API_Project.Controllers.ApiControllers
             this.htmlEncoder = htmlEncoder;
         }
         // GET: api/<GuestController>
-        [HttpGet]
+        [HttpGet, Authorize]
         public List<Guest> GetGuests()
         {
             List<Guest> guests = iGuestRepository.GetGuests();
             /*encoding(against xss) at the get request, so as to store the entity column in its plain form in the database*/
-            guests.ForEach(x => {
+            guests.ForEach(x =>
+            {
                 if (x != null)
                 {
                     string encodedGuestName = htmlEncoder.Encode(x.Name);
@@ -40,7 +43,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
 
         // GET api/<GuestController>/5
-        [HttpGet("{id}", Name = "GetGuestByID")]
+        [HttpGet("{id}", Name = "GetGuestByID"), Authorize]
         public IActionResult GetGuestByID(int id)
         {
             Guest guest = iGuestRepository.GetGuestByID(id);
@@ -55,11 +58,16 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
 
         // POST api/<GuestController>
-        [HttpPost]
-        public IActionResult Post([FromBody] Guest guest)
+        [HttpPost, Authorize, ValidateAntiForgeryToken]
+        public IActionResult Post([FromBody] CreateGuestViewModel createGuestViewModel)
         {
             try
             {
+                Guest guest = new Guest()
+                {
+                    ID = createGuestViewModel.ID,
+                    Name = createGuestViewModel.Name
+                };
                 iGuestRepository.CreateGuest(guest);
                 Uri uri = new Uri(Url.Link("GetGuestByID", new { Id = guest.ID }));
                 iUnitOfWork.Save();
@@ -72,12 +80,22 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
 
         // PUT api/<GuestController>/5
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Guest guest)
+        [HttpPut("{id}"), Authorize, ValidateAntiForgeryToken]
+        public IActionResult Put(int id, [FromBody] UpdateGuestViewModel updateGuestViewModel)
         {
-            if (guest != null)
+            if (updateGuestViewModel != null)
             {
-                guest.ID = id;
+                updateGuestViewModel.ID = id;
+                if (string.IsNullOrEmpty(updateGuestViewModel.Name))
+                {
+                    updateGuestViewModel.Name = iGuestRepository.GetGuestByID(updateGuestViewModel.ID).Name;
+                }
+                Guest guest = new Guest()
+                {
+                    ID = updateGuestViewModel.ID,
+                    Name = updateGuestViewModel.Name,
+                    Reservations = iGuestRepository.GetGuestByID(updateGuestViewModel.ID).Reservations
+                };
                 iGuestRepository.UpdateGuest(guest);
                 iUnitOfWork.Save();
                 return Ok(guest);
@@ -89,12 +107,16 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
 
         // DELETE api/<GuestController>/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}"), Authorize, ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
             Guest guestToDelete = iGuestRepository.GetGuestByID(id);
             if (guestToDelete != null)
             {
+                guestToDelete.Reservations.ForEach(x =>
+                {
+                    x.Guest.Name = iGuestRepository.GetGuests().Where(x => x.Name == "No Guest!").FirstOrDefault().Name;
+                });
                 iGuestRepository.DeleteGuest(guestToDelete.ID);
                 iUnitOfWork.Save();
                 return Ok(guestToDelete);

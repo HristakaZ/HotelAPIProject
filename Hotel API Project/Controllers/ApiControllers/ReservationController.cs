@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 using DataAccess.Repositories;
 using DataStructure;
 using Hotel_API_Project.Mappers;
+using Hotel_API_Project.Services;
 using Hotel_API_Project.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,10 +25,13 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         private IRoomRepository iRoomRepository;
         private IUnitOfWork iUnitOfWork;
         private HtmlEncoder htmlEncoder;
-        private IReservationMapper iReservationMapper;
+        private ICreateReservationMapper iCreateReservationMapper;
+        private IUpdateReservationMapper iUpdateReservationMapper;
+        private IUpdateReservationValidationService iUpdateReservationValidationService;
         public ReservationController(IReservationRepository iReservationRepository, IGuestRepository iGuestRepository,
             IRoomRepository iRoomRepository, IEmployeeRepository iEmployeeRepository, IUnitOfWork iUnitOfWork, HtmlEncoder htmlEncoder,
-            IReservationMapper iReservationMapper)
+            ICreateReservationMapper iCreateReservationMapper, IUpdateReservationMapper iUpdateReservationMapper,
+            IUpdateReservationValidationService iUpdateReservationValidationService)
         {
             this.iReservationRepository = iReservationRepository;
             this.iGuestRepository = iGuestRepository;
@@ -34,10 +39,12 @@ namespace Hotel_API_Project.Controllers.ApiControllers
             this.iRoomRepository = iRoomRepository;
             this.iUnitOfWork = iUnitOfWork;
             this.htmlEncoder = htmlEncoder;
-            this.iReservationMapper = iReservationMapper;
+            this.iCreateReservationMapper = iCreateReservationMapper;
+            this.iUpdateReservationMapper = iUpdateReservationMapper;
+            this.iUpdateReservationValidationService = iUpdateReservationValidationService;
         }
         // GET: api/<ReservationController>
-        [HttpGet]
+        [HttpGet, Authorize]
         public List<Reservation> GetReservations()
         {
             List<Reservation> reservations = iReservationRepository.GetReservations();
@@ -51,18 +58,26 @@ namespace Hotel_API_Project.Controllers.ApiControllers
                         string encodedEmployeeName = htmlEncoder.Encode(x.Employee.UserName);
                         x.Employee.UserName = encodedEmployeeName;
                     }
-                    else if (x.Guest != null)
+                    if (x.Guest != null)
                     {
                         string encodedGuestName = htmlEncoder.Encode(x.Guest.Name);
                         x.Guest.Name = encodedGuestName;
                     }
+                }
+                if (x.Employee == null)
+                {
+                    x.Employee = iEmployeeRepository.GetEmployees().Where(y => y.UserName == "NoEmployee").FirstOrDefault();
+                }
+                if (x.Guest == null)
+                {
+                    x.Guest = iGuestRepository.GetGuests().Where(y => y.Name == "No Guest!").FirstOrDefault();
                 }
             });
             return reservations;
         }
 
         // GET api/<ReservationController>/5
-        [HttpGet("{id}", Name = "GetReservationByID")]
+        [HttpGet("{id}", Name = "GetReservationByID"), Authorize]
         public IActionResult GetReservationByID(int id)
         {
             Reservation reservation = iReservationRepository.GetReservationByID(id);
@@ -77,22 +92,26 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
 
         // POST api/<ReservationController>
-        [HttpPost]
-        public IActionResult Post([FromBody] ReservationViewModel reservationViewModel)
+        [HttpPost, Authorize, ValidateAntiForgeryToken]
+        public IActionResult Post([FromBody] CreateReservationViewModel createReservationViewModel)
         {
             try
             {
-                Guest guestFromDropDownList = iGuestRepository.GetGuestByID(reservationViewModel.Guest.ID);
-                reservationViewModel.Guest = guestFromDropDownList;
-                EmployeeApplicationUser employeeFromDropDownList = iEmployeeRepository.GetEmployeeByID(reservationViewModel.Employee.Id);
-                reservationViewModel.Employee = employeeFromDropDownList;
+                foreach (RoomReservation roomReservation in createReservationViewModel.RoomReservations)
+                {
+                    if (roomReservation.RoomID == 0)
+                    {
+                        return BadRequest("The room is required");
+                    }
+                }
+                createReservationViewModel.StartDate = createReservationViewModel.StartDate.ToUniversalTime();
+                createReservationViewModel.EndDate = createReservationViewModel.EndDate.ToUniversalTime();
+                Guest guestFromDropDownList = iGuestRepository.GetGuestByID(createReservationViewModel.Guest.ID);
+                createReservationViewModel.Guest = guestFromDropDownList;
+                EmployeeApplicationUser employeeFromDropDownList = iEmployeeRepository.GetEmployeeByID(createReservationViewModel.Employee.Id);
+                createReservationViewModel.Employee = employeeFromDropDownList;
                 Reservation reservation = new Reservation();
-                reservation = iReservationMapper.MapReservationViewModelToModel(reservationViewModel, reservation);
-                reservation.RoomReservations = new List<RoomReservation>();
-                reservationViewModel.RoomReservation.Room = iRoomRepository.GetRoomByID
-                    (reservationViewModel.RoomReservation.RoomID);
-                reservationViewModel.RoomReservation.Reservation = reservation;
-                reservation.RoomReservations.Add(reservationViewModel.RoomReservation);
+                reservation = iCreateReservationMapper.MapCreateReservationViewModelToModel(createReservationViewModel, reservation);
                 iReservationRepository.CreateReservation(reservation);
                 Uri uri = new Uri(Url.Link("GetReservationByID", new { Id = reservation.ID }));
                 iUnitOfWork.Save();
@@ -105,24 +124,27 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
 
         // PUT api/<ReservationController>/5
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] ReservationViewModel reservationViewModel)
+        [HttpPut("{id}"), Authorize, ValidateAntiForgeryToken]
+        public IActionResult Put(int id, [FromBody] UpdateReservationViewModel updateReservationViewModel)
         {
-            if (reservationViewModel != null)
+            if (updateReservationViewModel != null)
             {
-                Guest guestFromDropDownList = iGuestRepository.GetGuestByID(reservationViewModel.Guest.ID);
-                reservationViewModel.Guest = guestFromDropDownList;
-                EmployeeApplicationUser employeeFromDropDownList = iEmployeeRepository.GetEmployeeByID(reservationViewModel.Employee.Id);
-                reservationViewModel.Employee = employeeFromDropDownList;
-                reservationViewModel.ID = id;
-                Reservation reservation = iReservationRepository.GetReservationByID(reservationViewModel.ID);
-                reservationViewModel.RoomReservation.Room = iRoomRepository.GetRoomByID(reservationViewModel.RoomReservation.RoomID);
-                reservationViewModel.RoomReservation.Reservation = reservation;
-                reservationViewModel.RoomReservation.ReservationID = reservationViewModel.RoomReservation.Reservation.ID;
-                List<RoomReservation> roomReservations = reservation.RoomReservations.Where(x => x.ReservationID == reservationViewModel.ID).ToList();
-                reservation = iReservationMapper.MapReservationViewModelToModel(reservationViewModel, reservation);
-                reservation.RoomReservations = new List<RoomReservation>();
-                reservation.RoomReservations.Add(reservationViewModel.RoomReservation);
+                Reservation reservation = new Reservation();
+                reservation = iUpdateReservationMapper.MapUpdateReservationViewModelToModel(updateReservationViewModel, reservation);
+                if (reservation.Employee.Id != 0)
+                {
+                    reservation.Employee = iEmployeeRepository.GetEmployeeByID(reservation.Employee.Id);
+                }
+                if (reservation.Guest.ID != 0)
+                {
+                    reservation.Employee = iEmployeeRepository.GetEmployeeByID(reservation.Employee.Id);
+                }
+                if (updateReservationViewModel.StartDate.HasValue && updateReservationViewModel.EndDate.HasValue)
+                {
+                    updateReservationViewModel.StartDate = updateReservationViewModel.StartDate.Value.ToUniversalTime();
+                    updateReservationViewModel.EndDate = updateReservationViewModel.EndDate.Value.ToUniversalTime();
+                }
+                iUpdateReservationValidationService.UpdateReservationValidation(reservation);
                 iReservationRepository.UpdateReservation(reservation);
                 iUnitOfWork.Save();
                 return Ok(reservation);
@@ -134,7 +156,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
 
         // DELETE api/<ReservationController>/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}"), Authorize, ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
             Reservation reservationToDelete = iReservationRepository.GetReservationByID(id);

@@ -38,6 +38,7 @@ namespace DataAccess.Repositories
                 // this code might be extended later, for more property updates
                 roomToUpdate.Number = room.Number;
                 roomToUpdate.RoomType = room.RoomType;
+                roomToUpdate.RoomReservations = room.RoomReservations;
                 dbContext.Rooms.Update(roomToUpdate);
             }
         }

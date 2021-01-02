@@ -1,5 +1,5 @@
 ﻿@model DataStructure.RoomType
-
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor
 @{
     ViewData["Title"] = "Update";
 }
@@ -29,7 +29,6 @@
                 let roomType = {
                     id: roomTypeID,
                     name: roomTypeName
-                    /* more info to be added here */
                 };
                 let url = 'https://localhost:44357/api/RoomType/' + roomTypeID;
                 $.ajax({
@@ -37,13 +36,17 @@
                     url: url,
                     accepts: 'json',
                     contentType: 'application/json',
+                    headers: {
+                        "Authorization": 'Bearer ' + "@httpContextAccessor.HttpContext.Request.Cookies["JWTCookie"]",
+                        "X-XSRF-TOKEN": $('#XSRFToken').val()
+                    },
                     data: JSON.stringify(roomType),
                     success: function (data) {
                         alert('Success! Edited RoomType with ID: ' + roomTypeID);
                         window.location.href = "https://localhost:44357/RoomType/Index";
                     },
                     error: function (data) {
-                        alert('Error!: ' + data.responseText);
+                        alert('Oops, an error occured, please try again later!');
                     }
                 });
             });
@@ -51,28 +54,40 @@
     }
 </script>
 
+@{
+    await Html.RenderPartialAsync("_JWTAuthenticationCheck");
+}
+
 <script type="text/javascript">
     getRoomTypeIDThroughURL();
     updateRoomType();
 </script>
 
+@*using form method="dialog" because post will not go into the success ajax callback function and will not redirect the user to the needed
+    page, also, ajax doesn't work the traditional "post" way of sending the form information and then removing it from the form*@
+<form method="dialog" id="myForm">
+    <div>
+        <input type="hidden" id="XSRFToken"
+               name="XSRFToken" value="@httpContextAccessor.HttpContext.Request.Cookies["XSRF-TOKEN"]">
+    </div>
 
-<div>
-    <input type="hidden" id="roomTypeID" />
-</div>
+    <div>
+        <input type="hidden" id="roomTypeID" />
+    </div>
 
-<div style="margin-bottom: 15px">
-    <input type="text" name="roomTypeName" placeholder="RoomType Name" id="roomTypeName" />
-</div>
+    <div style="margin-bottom: 15px">
+        <input type="text" name="roomTypeName" placeholder="RoomType Name" id="roomTypeName" />
+    </div>
 
-<div style="margin-bottom: 15px">
-    <input type="submit" name="updateRoomType" value="Update The RoomType" id="btnRoomTypeUpdate" />
-</div>
+    <div style="margin-bottom: 15px">
+        <input type="submit" name="updateRoomType" value="Update The RoomType" id="btnRoomTypeUpdate" />
+    </div>
+
+</form>
 
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
-
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

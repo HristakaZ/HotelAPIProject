@@ -1,8 +1,12 @@
 ﻿@model DataStructure.Reservation
-
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor
 @{
     ViewData["Title"] = "Update";
 }
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+<reference path="~/lib/jquery-validation/dist/jquery.validate.js" />
 
 <h1>Update</h1>
 
@@ -10,9 +14,7 @@
 
 <hr />
 
-<script src="~/lib/jquery/dist/jquery.js"></script>
-
-<script>
+<script type="text/javascript">
     function getReservationIDThroughURL() {
         let currentURL = window.location.toString();
         let reservationID = currentURL.substring(currentURL.lastIndexOf('/') + 1);
@@ -29,20 +31,41 @@
                 let guestDropDownList = $('#guestDropDownList');
                 let employeeDropDownList = $('#employeeDropDownList');
                 let roomDropDownList = $('#roomDropDownList');
+                let secondRoomDropDownList = $('#secondRoomDropDownList');
+                let thirdRoomDropDownList = $('#thirdRoomDropDownList');
                 let guest = {
                     id: Number(guestDropDownList.val())
                 };
                 let employee = {
                     id: Number(employeeDropDownList.val())
                 };
-                let roomReservation = {
+                let roomReservations = [];
+                roomReservations[0] = {
                     roomID: Number(roomDropDownList.val())
-                };
+                }
+                //checking if the second dropdownlist's values are different from the other two and also not 0(if the value is 0 then no room is picked)
+                if (Number(secondRoomDropDownList.val()) != 0 && Number(secondRoomDropDownList.val()) != Number(roomDropDownList.val())
+                    && Number(secondRoomDropDownList.val()) != Number(thirdRoomDropDownList.val())) {
+                    roomReservations[1] = {
+                        roomID: Number(secondRoomDropDownList.val())
+                    }
+                }
+                //checking if the third dropdownlist's values are different from the other two and also not 0(if the value is 0 then no room is picked)
+                if (Number(thirdRoomDropDownList.val()) != 0 && Number(secondRoomDropDownList.val()) != Number(thirdRoomDropDownList.val())
+                    && Number(thirdRoomDropDownList.val()) != Number(roomDropDownList.val())) {
+                    roomReservations[2] = {
+                        roomID: Number(thirdRoomDropDownList.val())
+                    }
+                }
+                let startDate = $('#reservationStartDate').val();
+                let endDate = $('#reservationEndDate').val();
                 let reservation = {
                     id: reservationID,
                     guest: guest,
                     employee: employee,
-                    roomReservation: roomReservation
+                    roomReservations: roomReservations,
+                    startDate: startDate,
+                    endDate: endDate
                 };
                 let url = 'https://localhost:44357/api/Reservation/' + reservationID;
                 $.ajax({
@@ -50,13 +73,17 @@
                     url: url,
                     accepts: 'json',
                     contentType: 'application/json',
+                    headers: {
+                        "Authorization": 'Bearer ' + "@httpContextAccessor.HttpContext.Request.Cookies["JWTCookie"]",
+                        "X-XSRF-TOKEN": $('#XSRFToken').val()
+                    },
                     data: JSON.stringify(reservation),
                     success: function (data) {
                         alert('Success! Edited Reservation with ID: ' + reservationID);
                         window.location.href = "https://localhost:44357/Reservation/Index";
                     },
                     error: function (data) {
-                        alert('Error!: ' + data.responseText);
+                        alert('One or more data validation errors occured. Please check the messages!');
                     }
                 });
             });
@@ -69,6 +96,9 @@
             type: 'GET',
             url: urlForGuest,
             contentType: 'application/json',
+            headers: {
+                "Authorization": 'Bearer ' + "@httpContextAccessor.HttpContext.Request.Cookies["JWTCookie"]"
+            },
             success: function (data) {
                 let guestDropDownList = $('#guestDropDownList');
                 $.each(data, function (index, val) {
@@ -89,6 +119,9 @@
             type: 'GET',
             url: urlForEmployee,
             contentType: 'application/json',
+            headers: {
+                "Authorization": 'Bearer ' + "@httpContextAccessor.HttpContext.Request.Cookies["JWTCookie"]"
+            },
             success: function (data) {
                 let employeeDropDownList = $('#employeeDropDownList');
                 $.each(data, function (index, val) {
@@ -109,64 +142,135 @@
             type: 'GET',
             url: urlForRooms,
             contentType: 'application/json',
+            headers: {
+                "Authorization": 'Bearer ' + "@httpContextAccessor.HttpContext.Request.Cookies["JWTCookie"]"
+            },
             success: function (data) {
                 let roomDropDownList = $('#roomDropDownList');
+                let secondRoomDropDownList = $('#secondRoomDropDownList');
+                let thirdRoomDropDownList = $('#thirdRoomDropDownList');
                 $.each(data, function (index, val) {
                     let optionForRoomDropDownList = $('<option>');
                     optionForRoomDropDownList.attr('value', val.id);
                     optionForRoomDropDownList.append(val.number);
                     optionForRoomDropDownList.append('</option>');
-                    roomDropDownList.append(optionForRoomDropDownList);
+                    optionForRoomDropDownList.appendTo([roomDropDownList, secondRoomDropDownList, thirdRoomDropDownList]);
                 });
             }
 
         });
     }
+
+    //ensuring that the end date is greater than the start date(must add class startDate at the reservation start date and class endDate at the reservation end date)
+    function ensureEndDateIsGreaterThanStartDate() {
+        //add startDate class on the reservation start Date input
+        //add endDate class on the reservation end Date input
+        $.validator.addMethod("endDate", function (value, element) {
+            let startDate = $('.startDate').val();
+            return Date.parse(startDate) <= Date.parse(value) || value == "";
+        }, "End date must be after start date");
+    }
+
+    function makeRoomDropDownsEnabledIfValueNotNull() {
+        $(document).ready(function () {
+            let roomDropDownList = $('#roomDropDownList');
+            let secondRoomDropDownList = $('#secondRoomDropDownList');
+            let thirdRoomDropDownList = $('#thirdRoomDropDownList');
+            secondRoomDropDownList.attr('disabled', true);
+            thirdRoomDropDownList.attr('disabled', true);
+            roomDropDownList.on('change', function () {
+                secondRoomDropDownList.attr('disabled', false);
+            });
+            secondRoomDropDownList.on('change', function () {
+                thirdRoomDropDownList.attr('disabled', false);
+            });
+        });
+    }
 </script>
 
+@{
+    await Html.RenderPartialAsync("_JWTAuthenticationCheck");
+}
+
 <script type="text/javascript">
-    getReservationIDThroughURL();
     getGuests();
     getEmployees();
     getRooms();
+    ensureEndDateIsGreaterThanStartDate();
+    makeRoomDropDownsEnabledIfValueNotNull();
     updateReservation();
 </script>
+@*using form method="dialog" because post will not go into the success ajax callback function and will not redirect the user to the needed
+    page, also, ajax doesn't work the traditional "post" way of sending the form information and then removing it from the form*@
+<form method="dialog" id="myForm">
+    <div>
+        <input type="hidden" id="XSRFToken"
+               name="XSRFToken" value="@httpContextAccessor.HttpContext.Request.Cookies["XSRF-TOKEN"]">
+    </div>
 
+    <div>
+        <input type="hidden" id="reservationID" />
+    </div>
 
-<div>
-    <input type="hidden" id="reservationID" />
-</div>
+    <label>
+        Reservation Start Date
+    </label>
+    <div style="margin-bottom: 15px">
+        <input type="datetime-local" name="reservationStartDate" id="reservationStartDate" class="startDate" />
+    </div>
 
-<div style="margin-bottom: 15px">
-    <input type="text" name="Reservation Date" placeholder="Reservation Date" id="reservationDate" />
-</div>
+    <label>
+        Reservation End Date
+    </label>
+    <div style="margin-bottom: 15px">
+        <input type="datetime-local" name="reservationEndDate" id="reservationEndDate" class="endDate" />
+    </div>
 
-<div style="margin-bottom: 15px">
-    <select id="guestDropDownList" name="guestDropDownList">
-        <option>Enter The Guest</option>
-    </select>
-</div>
+    <div style="margin-bottom: 15px">
+        <select id="guestDropDownList" name="guestDropDownList">
+            <option value="">Enter The Guest</option>
+        </select>
+    </div>
 
-<div style="margin-bottom: 15px">
-    <select id="employeeDropDownList" name="employeeDropDownList">
-        <option>Enter The Employee</option>
-    </select>
-</div>
+    <div style="margin-bottom: 15px">
+        <select id="employeeDropDownList" name="employeeDropDownList">
+            <option value="">Enter The Employee</option>
+        </select>
+    </div>
 
-<div style="margin-bottom: 15px">
-    <select id="roomDropDownList" name="roomDropDownList">
-        <option>Enter The Room</option>
-    </select>
-</div>
+    <div style="margin-bottom: 15px">
+        <select id="roomDropDownList" name="roomDropDownList">
+            <option value="">Enter The Room</option>
+        </select>
+    </div>
 
-<div style="margin-bottom: 15px">
-    <input type="submit" name="updateReservation" value="Update The Reservation" id="btnReservationUpdate" />
-</div>
+    <div style="margin-bottom: 15px">
+        <select id="secondRoomDropDownList" name="secondRoomDropDownList">
+            <option value="">Enter The Room</option>
+        </select>
+    </div>
+
+    <div style="margin-bottom: 15px">
+        <select id="thirdRoomDropDownList" name="thirdRoomDropDownList">
+            <option value="">Enter The Room</option>
+        </select>
+    </div>
+
+    <div style="margin-bottom: 15px">
+        <input type="submit" name="updateReservation" value="Update A Reservation" id="btnReservationUpdate" />
+    </div>
+</form>
+
+<script>
+    $('#myForm').validate();
+</script>
+<style>
+    .error {
+        color: red;
+        font-family: verdana, Helvetica;
+    }
+</style>
 
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}

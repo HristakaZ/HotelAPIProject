@@ -1,12 +1,11 @@
 ﻿@model IEnumerable<DataStructure.RoomType>
-
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor
 @{
     ViewData["Title"] = "RoomTypes";
 }
 
 <h1>RoomTypes</h1>
 <script src="~/lib/jquery/dist/jquery.js"></script>
-<!--TO DO: make the needed API calls to obtain the info-->
 <script type="text/javascript">
     function getRoomTypes() {
         $(document).ready(function () {
@@ -23,9 +22,11 @@
                 url: url,
                 contentType: 'application/json',
                 accepts: 'json',
+                headers: {
+                    Authorization: 'Bearer ' + "@httpContextAccessor.HttpContext.Request.Cookies["JWTCookie"]"
+                },
                 success: function (data) {
                     $.each(data, function (index, val) {
-                        /* TO DO: MAKE THE DELETE PAGE*/
                         let linkForUpdate = $('<a>');
                         linkForUpdate.attr('href', 'https://localhost:44357/RoomType/Update/' + val.id);
                         ulRoomTypes.append('</br>');
@@ -45,6 +46,10 @@
         });
     }
 </script>
+
+@{
+    await Html.RenderPartialAsync("_JWTAuthenticationCheck");
+}
 
 <script>
     getRoomTypes();

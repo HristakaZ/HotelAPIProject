@@ -37,6 +37,7 @@ namespace DataAccess.Repositories
             {
                 // this code might be extended later, for more property updates
                 roomTypeToUpdate.Name = roomType.Name;
+                roomTypeToUpdate.Rooms = roomType.Rooms;
                 dbContext.RoomTypes.Update(roomTypeToUpdate);
             }
         }

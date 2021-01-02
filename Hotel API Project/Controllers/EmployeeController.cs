@@ -23,7 +23,7 @@ namespace Hotel_API_Project.Controllers
         }
         public ActionResult Create()
         {
-            return View();
+            return new RedirectResult("/Identity/Account/Register");
         }
         public ActionResult Update()
         {

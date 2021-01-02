@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using DataAccess.Repositories;
 using DataStructure;
 using Hotel_API_Project.Data;
+using Hotel_API_Project.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -60,7 +61,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
 
         // GET api/<EmployeeController>/5
-        [HttpGet("{id}", Name = "GetEmployeeByID")]
+        [HttpGet("{id}", Name = "GetEmployeeByID"), Authorize]
         public IActionResult GetEmployeeByID(int id)
         {
             EmployeeApplicationUser employee = iEmployeeRepository.GetEmployeeByID(id);
@@ -75,18 +76,21 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
 
         // POST api/<EmployeeController>
-        [HttpPost]
+        [HttpPost, Authorize, ValidateAntiForgeryToken]
         public IActionResult Post([FromBody] EmployeeApplicationUser employee)
         {
             try
             {
                 //TO DO for later on: move the create logic for the employee position into a service 
                 List<PositionApplicationRole> positions = iPositionRepository.GetPositions();
-                PositionApplicationRole employeePositionFromDropDownList = positions.Where(x => x.Id == employee.Position.Id).FirstOrDefault();
-                employee.Position = employeePositionFromDropDownList;
-                if (employee.Position == null)
+                if (employee.Position == null || employee.Position.Id == 0)
                 {
                     employee.Position = positions.Where(x => x.Name == "No Position!").FirstOrDefault();
+                }
+                else
+                {
+                    PositionApplicationRole employeePositionFromDropDownList = positions.Where(x => x.Id == employee.Position.Id).FirstOrDefault();
+                    employee.Position = employeePositionFromDropDownList;
                 }
                 iEmployeeRepository.CreateEmployee(employee);
                 Uri uri = new Uri(Url.Link("GetEmployeeByID", new { Id = employee.Id }));
@@ -100,16 +104,33 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
 
         // PUT api/<EmployeeController>/5
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] EmployeeApplicationUser employee)
+        [HttpPut("{id}"), Authorize, ValidateAntiForgeryToken]
+        public IActionResult Put(int id, [FromBody] UpdateEmployeeViewModel employeeViewModel)
         {
-            if (employee != null)
+            if (employeeViewModel != null)
             {
-                employee.Id = id;
+                employeeViewModel.ID = id;
+                if (string.IsNullOrEmpty(employeeViewModel.UserName))
+                {
+                    employeeViewModel.UserName = iEmployeeRepository.GetEmployeeByID(employeeViewModel.ID).UserName;
+                }
                 //TO DO for later on: move the update logic for the employee position into a service
                 List<PositionApplicationRole> positions = iPositionRepository.GetPositions();
-                PositionApplicationRole employeePositionFromDropDownList = positions.Where(x => x.Id == employee.Position.Id).FirstOrDefault();
-                employee.Position = employeePositionFromDropDownList;
+                if (employeeViewModel.Position.Id == 0)
+                {
+                    employeeViewModel.Position = iEmployeeRepository.GetEmployeeByID(employeeViewModel.ID).Position;
+                }
+                else
+                {
+                    PositionApplicationRole employeePositionFromDropDownList = positions.Where(x => x.Id == employeeViewModel.Position.Id).FirstOrDefault();
+                    employeeViewModel.Position = employeePositionFromDropDownList;
+                }
+                EmployeeApplicationUser employee = new EmployeeApplicationUser()
+                {
+                    Id = employeeViewModel.ID,
+                    UserName = employeeViewModel.UserName,
+                    Position = employeeViewModel.Position
+                };
                 iEmployeeRepository.UpdateEmployee(employee);
                 iUnitOfWork.Save();
                 return Ok(employee);
@@ -122,12 +143,15 @@ namespace Hotel_API_Project.Controllers.ApiControllers
 
 
         // DELETE api/<EmployeeController>/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}"), Authorize, ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
             EmployeeApplicationUser employeeToDelete = iEmployeeRepository.GetEmployeeByID(id);
             if (employeeToDelete != null)
             {
+                //if a certain reservation has this employee(the employee for deletion), we are setting its employee to be "NoEmployee"
+                employeeToDelete.Reservations.ForEach(x =>
+                    x.Employee = iEmployeeRepository.GetEmployees().Where(x => x.UserName == "NoEmployee").FirstOrDefault());
                 iEmployeeRepository.DeleteEmployee(employeeToDelete.Id);
                 iUnitOfWork.Save();
                 return Ok(employeeToDelete);

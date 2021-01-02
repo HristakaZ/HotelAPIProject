@@ -5,6 +5,10 @@ using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using DataAccess.Repositories;
 using DataStructure;
+using Hotel_API_Project.Mappers;
+using Hotel_API_Project.Services;
+using Hotel_API_Project.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,16 +22,21 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         private IRoomTypeRepository iRoomTypeRepository;
         private IUnitOfWork iUnitOfWork;
         private HtmlEncoder htmlEncoder;
+        private IUpdateRoomMapper iUpdateRoomMapper;
+        private IUpdateRoomValidationService iUpdateRoomValidationService;
         public RoomController(IRoomRepository iRoomRepository, IRoomTypeRepository iRoomTypeRepository,
-            IUnitOfWork iUnitOfWork, HtmlEncoder htmlEncoder)
+            IUnitOfWork iUnitOfWork, HtmlEncoder htmlEncoder, IUpdateRoomMapper iUpdateRoomMapper, 
+            IUpdateRoomValidationService iUpdateRoomValidationService)
         {
             this.iRoomRepository = iRoomRepository;
             this.iRoomTypeRepository = iRoomTypeRepository;
             this.iUnitOfWork = iUnitOfWork;
             this.htmlEncoder = htmlEncoder;
+            this.iUpdateRoomMapper = iUpdateRoomMapper;
+            this.iUpdateRoomValidationService = iUpdateRoomValidationService;
         }
         // GET: api/<RoomController>
-        [HttpGet]
+        [HttpGet, Authorize]
         public List<Room> GetRooms()
         {
             List<Room> rooms = iRoomRepository.GetRooms();
@@ -47,7 +56,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
 
         // GET api/<RoomController>/5
-        [HttpGet("{id}", Name = "GetRoomByID")]
+        [HttpGet("{id}", Name = "GetRoomByID"), Authorize]
         public IActionResult GetRoomByID(int id)
         {
             Room room = iRoomRepository.GetRoomByID(id);
@@ -62,14 +71,23 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
 
         // POST api/<RoomController>
-        [HttpPost]
-        public IActionResult Post([FromBody] Room room)
+        [HttpPost, Authorize, ValidateAntiForgeryToken]
+        public IActionResult Post([FromBody] CreateRoomViewModel createRoomViewModel)
         {
             try
             {
-                //TO DO for later on: move the create logic for the room roomtype in a service
-                RoomType roomTypeFromDropDownList = iRoomTypeRepository.GetRoomTypeByID(room.RoomType.ID);
-                room.RoomType = roomTypeFromDropDownList;
+                Room room = new Room()
+                {
+                    ID = createRoomViewModel.ID,
+                    Number = createRoomViewModel.Number,
+                    RoomType = createRoomViewModel.RoomType,
+                    RoomReservations = createRoomViewModel.RoomReservations
+                };
+                if (room.RoomType != null && room.RoomType.ID != 0)
+                {
+                    RoomType roomTypeFromDropDownList = iRoomTypeRepository.GetRoomTypeByID(room.RoomType.ID);
+                    room.RoomType = roomTypeFromDropDownList;
+                }
                 iRoomRepository.CreateRoom(room);
                 Uri uri = new Uri(Url.Link("GetRoomByID", new { Id = room.ID }));
                 iUnitOfWork.Save();
@@ -82,16 +100,14 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
 
         // PUT api/<RoomController>/5
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Room room)
+        [HttpPut("{id}"), Authorize, ValidateAntiForgeryToken]
+        public IActionResult Put(int id, [FromBody] UpdateRoomViewModel updateRoomViewModel)
         {
-            if (room != null)
+            if (updateRoomViewModel != null)
             {
-                //TO DO for later on: move the update logic for the room roomtype in a service
-                room.ID = id;
-                List<RoomType> roomTypes = iRoomTypeRepository.GetRoomTypes();
-                RoomType roomTypeFromDropDownList = roomTypes.Where(x => x.ID == room.RoomType.ID).FirstOrDefault();
-                room.RoomType = roomTypeFromDropDownList;
+                Room room = new Room();
+                room = iUpdateRoomMapper.MapUpdateRoomViewModelToModel(updateRoomViewModel, room);
+                iUpdateRoomValidationService.UpdateRoomValidation(room);
                 iRoomRepository.UpdateRoom(room);
                 iUnitOfWork.Save();
                 return Ok(room);
@@ -103,7 +119,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
 
         // DELETE api/<RoomController>/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}"), Authorize, ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
             Room roomToDelete = iRoomRepository.GetRoomByID(id);

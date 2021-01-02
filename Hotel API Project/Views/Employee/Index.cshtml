@@ -1,6 +1,7 @@
 ﻿@using DataStructure
 @using Hotel_API_Project.ViewModels
 @using Microsoft.AspNetCore.Http
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor
 @model IEnumerable<EmployeeApplicationUser>
 @{
     ViewData["Title"] = "Employees";
@@ -10,25 +11,18 @@
 <h1></h1>
 <h1></h1>
 <script src="~/lib/jquery/dist/jquery.js"></script>
-<!--TO DO: make the needed API calls to obtain the info-->
 <script type="text/javascript">
     function getEmployees() {
         $(document).ready(function () {
             let url = 'https://localhost:44357/api/Employee';
             let ulEmployees = $('#ulEmployees');
-            let linkForCreate = $('<a>');
-            linkForCreate.attr('href', 'https://localhost:44357/Employee/Create');
-            linkForCreate.text('Create Employee');
-            ulEmployees.append(linkForCreate);
-            ulEmployees.append('</br>');
-            ulEmployees.append('</br>');
             $.ajax({
                 type: 'GET',
                 url: url,
                 contentType: 'application/json',
                 accepts: 'json',
                 headers: {
-                    Authorization: 'Bearer ' + "@Context.Request.Cookies["JWTCookie"]"
+                    Authorization: 'Bearer ' + "@httpContextAccessor.HttpContext.Request.Cookies["JWTCookie"]"
                 },
                 success: function (data) {
                     $.each(data, function (index, val) {
