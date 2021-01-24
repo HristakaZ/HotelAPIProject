@@ -57,15 +57,18 @@ namespace Hotel_API_Project
             }).AddCookie(configuration => configuration.SlidingExpiration = true)
             .AddJwtBearer(options =>
             {
+                string issuer = Configuration["JWTConfiguration:issuer"];
+                string audience = Configuration["JWTConfiguration:audience"];
+                string secret = Configuration["JWTConfiguration:secret"];
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = "http://localhost:5000",
-                    ValidAudience = "http://localhost:5000",
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKey@345")),
+                    ValidIssuer = issuer,
+                    ValidAudience = audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
                     ClockSkew = TimeSpan.FromMinutes(5)
                 };
             });

@@ -104,7 +104,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
 
         // PUT api/<EmployeeController>/5
-        [HttpPut("{id}"), Authorize, ValidateAntiForgeryToken]
+        [HttpPut("{id}"), Authorize(Roles = "Admin"), ValidateAntiForgeryToken]
         public IActionResult Put(int id, [FromBody] UpdateEmployeeViewModel employeeViewModel)
         {
             if (employeeViewModel != null)
