@@ -106,7 +106,7 @@ namespace Hotel_API_Project.Areas.Identity.Pages.Account
                     string jsonToken = await response.Content.ReadAsStringAsync();
                     TokenDTO token = JsonConvert.DeserializeObject<TokenDTO>(jsonToken);
                     string jsonWebToken = token.Token;
-                    HttpContext.Response.Cookies.Append("JWTCookie", jsonWebToken, new CookieOptions() { HttpOnly = true, Secure = true, SameSite = SameSiteMode.Strict});
+                    HttpContext.Response.Cookies.Append("JWTCookie", jsonWebToken, new CookieOptions() { HttpOnly = true, Secure = true, SameSite = SameSiteMode.Strict });
                     returnUrl = "/Home/Index";
                     SecurityTokenHandler handler = new JwtSecurityTokenHandler();
                     JwtSecurityToken decodedJsonWebToken = handler.ReadToken(jsonWebToken) as JwtSecurityToken;
@@ -116,7 +116,10 @@ namespace Hotel_API_Project.Areas.Identity.Pages.Account
                     bool isAuthenticated = currentEmployeeUser.Id != 0;
                     HttpContext.Session.SetString("IsAuthenticated", isAuthenticated.ToString().ToLower());
                     HttpContext.Session.SetString("UserName", currentEmployeeUser.UserName);
-                    HttpContext.Session.SetString("Role", currentEmployeeUser.Position.Name);
+                    if (currentEmployeeUser.Position != null)
+                    {
+                        HttpContext.Session.SetString("Role", currentEmployeeUser.Position.Name);
+                    }
                     HttpContext.Session.SetString("JWTExpirationDate", jwtExpirationDate.ToString());
                     return LocalRedirect(returnUrl);
                 }
