@@ -45,35 +45,39 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
         // GET: api/<ReservationController>
         [HttpGet, Authorize]
-        public List<Reservation> GetReservations()
+        public IActionResult GetReservations()
         {
             List<Reservation> reservations = iReservationRepository.GetReservations();
             /*encoding(against xss) at the get request, so as to store the entity column in its plain form in the database*/
-            reservations.ForEach(x =>
+            if (reservations != null)
             {
-                if (x != null)
+                reservations.ForEach(x =>
                 {
-                    if (x.Employee != null)
+                    if (x != null)
                     {
-                        string encodedEmployeeName = htmlEncoder.Encode(x.Employee.UserName);
-                        x.Employee.UserName = encodedEmployeeName;
+                        if (x.Employee != null)
+                        {
+                            string encodedEmployeeName = htmlEncoder.Encode(x.Employee.UserName);
+                            x.Employee.UserName = encodedEmployeeName;
+                        }
+                        if (x.Guest != null)
+                        {
+                            string encodedGuestName = htmlEncoder.Encode(x.Guest.Name);
+                            x.Guest.Name = encodedGuestName;
+                        }
                     }
-                    if (x.Guest != null)
+                    if (x.Employee == null)
                     {
-                        string encodedGuestName = htmlEncoder.Encode(x.Guest.Name);
-                        x.Guest.Name = encodedGuestName;
+                        x.Employee = iEmployeeRepository.GetEmployees().Where(y => y.UserName == "NoEmployee").FirstOrDefault();
                     }
-                }
-                if (x.Employee == null)
-                {
-                    x.Employee = iEmployeeRepository.GetEmployees().Where(y => y.UserName == "NoEmployee").FirstOrDefault();
-                }
-                if (x.Guest == null)
-                {
-                    x.Guest = iGuestRepository.GetGuests().Where(y => y.Name == "No Guest!").FirstOrDefault();
-                }
-            });
-            return reservations;
+                    if (x.Guest == null)
+                    {
+                        x.Guest = iGuestRepository.GetGuests().Where(y => y.Name == "No Guest!").FirstOrDefault();
+                    }
+                });
+                return Ok(reservations);
+            }
+            return NotFound("No reservations were found!");
         }
 
         // GET api/<ReservationController>/5

@@ -32,7 +32,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
         // GET: api/<EmployeeController>
         [HttpGet, Authorize]
-        public List<EmployeeApplicationUser> GetEmployees()
+        public IActionResult GetEmployees()
         {
             List<EmployeeApplicationUser> employees = iEmployeeRepository.GetEmployees();
             List<PositionApplicationRole> positions = iPositionRepository.GetPositions();
@@ -56,8 +56,9 @@ namespace Hotel_API_Project.Controllers.ApiControllers
                         }
                     }
                 });
+                return Ok(employees);
             }
-            return employees;
+            return NotFound("No employees were found!");
         }
 
         // GET api/<EmployeeController>/5

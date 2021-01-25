@@ -27,19 +27,23 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
         // GET: api/<PositionController>
         [HttpGet, Authorize]
-        public List<PositionApplicationRole> GetPositions()
+        public IActionResult GetPositions()
         {
             List<PositionApplicationRole> positions = iPositionRepository.GetPositions();
             /*encoding(against xss) at the get request, so as to store the entity column in its plain form in the database*/
-            positions.ForEach(x =>
+            if (positions != null)
             {
-                if (x != null)
+                positions.ForEach(x =>
                 {
-                    string encodedPositionName = htmlEncoder.Encode(x.Name);
-                    x.Name = encodedPositionName;
-                }
-            });
-            return positions;
+                    if (x != null)
+                    {
+                        string encodedPositionName = htmlEncoder.Encode(x.Name);
+                        x.Name = encodedPositionName;
+                    }
+                });
+                return Ok(positions);
+            }
+            return NotFound("No positions were found!");
         }
 
         // GET api/<PositionController>/5

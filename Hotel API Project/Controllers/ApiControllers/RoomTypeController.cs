@@ -33,19 +33,23 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
         // GET: api/<RoomTypeController>
         [HttpGet, Authorize]
-        public List<RoomType> GetRoomTypes()
+        public IActionResult GetRoomTypes()
         {
             List<RoomType> roomTypes = iRoomTypeRepository.GetRoomTypes();
             /*encoding(against xss) at the get request, so as to store the entity column in its plain form in the database*/
-            roomTypes.ForEach(x =>
+            if (roomTypes != null)
             {
-                if (x != null)
+                roomTypes.ForEach(x =>
                 {
-                    string encodedRoomTypeName = htmlEncoder.Encode(x.Name);
-                    x.Name = encodedRoomTypeName;
-                }
-            });
-            return roomTypes;
+                    if (x != null)
+                    {
+                        string encodedRoomTypeName = htmlEncoder.Encode(x.Name);
+                        x.Name = encodedRoomTypeName;
+                    }
+                });
+                return Ok(roomTypes);
+            }
+            return NotFound("No room types were found!");
         }
 
         // GET api/<RoomTypeController>/5

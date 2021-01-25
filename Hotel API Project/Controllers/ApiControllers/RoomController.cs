@@ -25,7 +25,7 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         private IUpdateRoomMapper iUpdateRoomMapper;
         private IUpdateRoomValidationService iUpdateRoomValidationService;
         public RoomController(IRoomRepository iRoomRepository, IRoomTypeRepository iRoomTypeRepository,
-            IUnitOfWork iUnitOfWork, HtmlEncoder htmlEncoder, IUpdateRoomMapper iUpdateRoomMapper, 
+            IUnitOfWork iUnitOfWork, HtmlEncoder htmlEncoder, IUpdateRoomMapper iUpdateRoomMapper,
             IUpdateRoomValidationService iUpdateRoomValidationService)
         {
             this.iRoomRepository = iRoomRepository;
@@ -37,22 +37,26 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
         // GET: api/<RoomController>
         [HttpGet, Authorize]
-        public List<Room> GetRooms()
+        public IActionResult GetRooms()
         {
             List<Room> rooms = iRoomRepository.GetRooms();
             /*encoding(against xss) at the get request, so as to store the entity column in its plain form in the database*/
-            rooms.ForEach(x =>
+            if (rooms != null)
             {
-                if (x != null)
+                rooms.ForEach(x =>
                 {
-                    if (x.RoomType != null)
+                    if (x != null)
                     {
-                        string encodedRoomRoomType = htmlEncoder.Encode(x.RoomType.Name);
-                        x.RoomType.Name = encodedRoomRoomType;
+                        if (x.RoomType != null)
+                        {
+                            string encodedRoomRoomType = htmlEncoder.Encode(x.RoomType.Name);
+                            x.RoomType.Name = encodedRoomRoomType;
+                        }
                     }
-                }
-            });
-            return rooms;
+                });
+                return Ok(rooms);
+            }
+            return NotFound("No rooms were found!");
         }
 
         // GET api/<RoomController>/5

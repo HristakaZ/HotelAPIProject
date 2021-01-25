@@ -27,19 +27,23 @@ namespace Hotel_API_Project.Controllers.ApiControllers
         }
         // GET: api/<GuestController>
         [HttpGet, Authorize]
-        public List<Guest> GetGuests()
+        public IActionResult GetGuests()
         {
             List<Guest> guests = iGuestRepository.GetGuests();
             /*encoding(against xss) at the get request, so as to store the entity column in its plain form in the database*/
-            guests.ForEach(x =>
+            if (guests != null)
             {
-                if (x != null)
+                guests.ForEach(x =>
                 {
-                    string encodedGuestName = htmlEncoder.Encode(x.Name);
-                    x.Name = encodedGuestName;
-                }
-            });
-            return guests;
+                    if (x != null)
+                    {
+                        string encodedGuestName = htmlEncoder.Encode(x.Name);
+                        x.Name = encodedGuestName;
+                    }
+                });
+                return Ok(guests);
+            }
+            return NotFound("No guests were found!");
         }
 
         // GET api/<GuestController>/5
